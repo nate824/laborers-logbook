@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <rect width="512" height="512" rx="96" fill="#024985"/>
+  <rect x="96" y="388" width="320" height="14" rx="7" fill="#f16521"/>
+  <g fill="#ffffff" font-family="-apple-system, system-ui, sans-serif" font-weight="700" text-anchor="middle">
+    <text x="256" y="250" font-size="170" letter-spacing="6">ACL</text>
+    <text x="256" y="350" font-size="64" letter-spacing="4">LOGBOOK</text>
+  </g>
+</svg>

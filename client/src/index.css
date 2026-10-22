@@ -1,0 +1,114 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --background: 0 0% 98%;
+  --foreground: 0 0% 9%;
+  --muted: 0 0% 96%;
+  --muted-foreground: 0 0% 45%;
+  --popover: 0 0% 100%;
+  --popover-foreground: 0 0% 9%;
+  --card: 0 0% 100%;
+  --card-foreground: 0 0% 9%;
+  --border: 0 0% 89.8%;
+  --input: 0 0% 89.8%;
+  --primary: 20 88% 54%;
+  --primary-foreground: 0 0% 98%;
+  --secondary: 120 50% 50%;
+  --secondary-foreground: 0 0% 98%;
+  --accent: 240 5.9% 90%;
+  --accent-foreground: 240 5.9% 10%;
+  --destructive: 0 84.2% 60.2%;
+  --destructive-foreground: 0 0% 98%;
+  --ring: 20 88% 54%;
+  --chart-1: 20 88% 54%;
+  --chart-2: 142 76% 45%;
+  --chart-3: 30 100% 50%;
+  --chart-4: 271 100% 50%;
+  --chart-5: 0 100% 50%;
+  --radius: 0.5rem;
+}
+
+.dark {
+  --background: 240 10% 3.9%;
+  --foreground: 0 0% 98%;
+  --muted: 240 3.7% 15.9%;
+  --muted-foreground: 240 5% 64.9%;
+  --popover: 240 10% 3.9%;
+  --popover-foreground: 0 0% 98%;
+  --card: 240 10% 3.9%;
+  --card-foreground: 0 0% 98%;
+  --border: 240 3.7% 15.9%;
+  --input: 240 3.7% 15.9%;
+  --primary: 20 88% 54%;
+  --primary-foreground: 0 0% 98%;
+  --secondary: 120 50% 50%;
+  --secondary-foreground: 0 0% 98%;
+  --accent: 240 3.7% 15.9%;
+  --accent-foreground: 0 0% 98%;
+  --destructive: 0 62.8% 30.6%;
+  --destructive-foreground: 0 0% 98%;
+  --ring: 20 88% 54%;
+  --chart-1: 20 88% 54%;
+  --chart-2: 142 76% 45%;
+  --chart-3: 30 100% 50%;
+  --chart-4: 271 100% 50%;
+  --chart-5: 0 100% 50%;
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  html {
+    @apply scroll-smooth;
+  }
+
+  body {
+    @apply font-sans antialiased bg-background text-foreground;
+    /* iOS: stop fixed-width content from making the page wider than the
+       viewport, which makes vertical scrolling feel broken, and keep
+       momentum scrolling + stable text sizing. */
+    overflow-x: hidden;
+    -webkit-overflow-scrolling: touch;
+    -webkit-text-size-adjust: 100%;
+  }
+  
+  /* Custom styles for OJT table */
+  .ojt-table thead th {
+    @apply text-xs uppercase tracking-wider font-medium text-muted-foreground;
+  }
+  
+  .ojt-table tbody td {
+    @apply py-3 px-4 text-sm;
+  }
+  
+  .ojt-table .verified-row {
+    @apply bg-green-50/30;
+  }
+  
+  .verified-badge {
+    @apply inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-green-100 text-green-800;
+  }
+}
+
+/* Mobile app shell: room for the fixed bottom tab bar and the iOS home
+   indicator / notch when installed as a PWA (viewport-fit=cover). */
+@layer utilities {
+  .pb-mobile-nav {
+    padding-bottom: calc(6rem + env(safe-area-inset-bottom));
+  }
+  @media (min-width: 768px) {
+    .pb-mobile-nav {
+      padding-bottom: 2rem;
+    }
+  }
+  .pt-safe {
+    padding-top: env(safe-area-inset-top);
+  }
+  .pb-safe {
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+}

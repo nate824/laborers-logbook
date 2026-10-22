@@ -1,0 +1,53 @@
+{
+  "form_id": "sprat_log_v1",
+  "company": "SPRAT (Society of Professional Rope Access Technicians)",
+  "form_title": "Rope Access Experience Log",
+  "blank_pdf": "SPRAT_RopeAccessLog_Fillable.pdf",
+  "page_count": 1,
+  "orientation": "landscape",
+  "max_entry_rows": 6,
+  "structure_notes": [
+    "Single double-page logbook spread per PDF.",
+    "6 entry rows. Each row captures one rope access work period.",
+    "Footer holds running totals and the page's hours total."
+  ],
+  "fields": {
+    "rows_template": {
+      "description": "There are 6 rows. PDF field names: row_<N>_<key> where N is 1..6.",
+      "keys": {
+        "date":                { "label": "Date(s) of Work",       "format": "free text - date or range like 'M/D/YYYY - M/D/YYYY'" },
+        "employer":            { "label": "Employer",              "format": "company name" },
+        "work_details":        { "label": "Work Details",          "format": "free text description" },
+        "rope_access_details": { "label": "Rope Access Details",   "format": "free text (techniques, anchor types, etc.)" },
+        "signature_logid":     { "label": "Signature and Log #",   "format": "supervisor signature/initials + SPRAT log #" },
+        "hours_worked":        { "label": "Hours Worked",          "format": "decimal hours" }
+      }
+    },
+    "footer": {
+      "total_hours_since_cert": {
+        "pdf_field": "total_hours_since_cert",
+        "type": "text",
+        "label": "Total Work Hours Since Previous Certification"
+      },
+      "running_total": {
+        "pdf_field": "running_total",
+        "type": "text",
+        "label": "Running Total"
+      },
+      "hours_this_page": {
+        "pdf_field": "hours_this_page",
+        "type": "text",
+        "label": "Total Work Hours on this Page"
+      }
+    }
+  },
+  "all_pdf_field_names": [
+    "row_1_date", "row_1_employer", "row_1_work_details", "row_1_rope_access_details", "row_1_signature_logid", "row_1_hours_worked",
+    "row_2_date", "row_2_employer", "row_2_work_details", "row_2_rope_access_details", "row_2_signature_logid", "row_2_hours_worked",
+    "row_3_date", "row_3_employer", "row_3_work_details", "row_3_rope_access_details", "row_3_signature_logid", "row_3_hours_worked",
+    "row_4_date", "row_4_employer", "row_4_work_details", "row_4_rope_access_details", "row_4_signature_logid", "row_4_hours_worked",
+    "row_5_date", "row_5_employer", "row_5_work_details", "row_5_rope_access_details", "row_5_signature_logid", "row_5_hours_worked",
+    "row_6_date", "row_6_employer", "row_6_work_details", "row_6_rope_access_details", "row_6_signature_logid", "row_6_hours_worked",
+    "total_hours_since_cert", "running_total", "hours_this_page"
+  ]
+}

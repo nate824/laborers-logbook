@@ -1,0 +1,46 @@
+{
+  "form_id": "irata_log_v1",
+  "company": "IRATA (Industrial Rope Access Trade Association)",
+  "form_title": "Work Experience",
+  "blank_pdf": "IRATA_WorkExperience_Fillable.pdf",
+  "page_count": 1,
+  "orientation": "landscape",
+  "max_entry_rows": 7,
+  "structure_notes": [
+    "Single double-page logbook spread per PDF.",
+    "7 entry rows. Each row captures one rope access work period.",
+    "Each row's Date field accepts a date range or list of dates (matches book convention).",
+    "Footer holds a single running totals value under the Hours worked column."
+  ],
+  "fields": {
+    "rows_template": {
+      "description": "There are 7 rows. PDF field names: row_<N>_<key> where N is 1..7.",
+      "keys": {
+        "date":         { "label": "Date",                                "format": "free text - date or range" },
+        "employer":     { "label": "Employing Company",                   "format": "company name" },
+        "task_details": { "label": "Details of task being undertaken",    "format": "free text description" },
+        "location":     { "label": "Location",                            "format": "city, state/country" },
+        "hours_worked": { "label": "Hours worked",                        "format": "decimal hours" },
+        "max_height":   { "label": "Max Height Worked",                   "format": "free text, may include both metric and imperial e.g. '12m / 40ft'" },
+        "supervisor":   { "label": "Supervisor's Signature",              "format": "supervisor signature/initials + IRATA log #" }
+      }
+    },
+    "footer": {
+      "running_total_hours": {
+        "pdf_field": "running_total_hours",
+        "type": "text",
+        "label": "Running totals worked (Hours)"
+      }
+    }
+  },
+  "all_pdf_field_names": [
+    "row_1_date", "row_1_employer", "row_1_task_details", "row_1_location", "row_1_hours_worked", "row_1_max_height", "row_1_supervisor",
+    "row_2_date", "row_2_employer", "row_2_task_details", "row_2_location", "row_2_hours_worked", "row_2_max_height", "row_2_supervisor",
+    "row_3_date", "row_3_employer", "row_3_task_details", "row_3_location", "row_3_hours_worked", "row_3_max_height", "row_3_supervisor",
+    "row_4_date", "row_4_employer", "row_4_task_details", "row_4_location", "row_4_hours_worked", "row_4_max_height", "row_4_supervisor",
+    "row_5_date", "row_5_employer", "row_5_task_details", "row_5_location", "row_5_hours_worked", "row_5_max_height", "row_5_supervisor",
+    "row_6_date", "row_6_employer", "row_6_task_details", "row_6_location", "row_6_hours_worked", "row_6_max_height", "row_6_supervisor",
+    "row_7_date", "row_7_employer", "row_7_task_details", "row_7_location", "row_7_hours_worked", "row_7_max_height", "row_7_supervisor",
+    "running_total_hours"
+  ]
+}
