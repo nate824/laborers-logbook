@@ -112,7 +112,7 @@ const METHOD_OPTIONS = Object.keys(FieldMethods);
 const emptyOJTRow = (): OJTRow => ({
   date: "",
   location: "",
-  method: FieldMethods.DRILLING,
+  method: FieldMethods.ON_THE_JOB,
   hours: "",
 });
 
@@ -197,7 +197,7 @@ export function ImportLogDialog({ open, onClose, type }: ImportLogDialogProps) {
           return {
             date: asString(r.date).slice(0, 10),
             location: asString(r.location),
-            method: METHOD_OPTIONS.includes(method) ? method : FieldMethods.DRILLING,
+            method: METHOD_OPTIONS.includes(method) ? method : FieldMethods.ON_THE_JOB,
             hours: asNumberString(r.hours),
           };
         });

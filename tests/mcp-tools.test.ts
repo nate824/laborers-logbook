@@ -189,8 +189,8 @@ describe("MCP tools/list and tools/call", () => {
     const app = await makeApp();
     const bearer = seedBearer();
     storageMock.getEntries.mockResolvedValueOnce([
-      { id: 1, userId: 1, method: "DRILLING", hours: 3, verified: false, date: new Date("2025-01-01"), location: "Site A" } as never,
-      { id: 2, userId: 1, method: "DRILLING", hours: 2, verified: true, date: new Date("2025-01-02"), location: "Site B" } as never,
+      { id: 1, userId: 1, method: "ON_THE_JOB", hours: 3, verified: false, date: new Date("2025-01-01"), location: "Site A" } as never,
+      { id: 2, userId: 1, method: "ON_THE_JOB", hours: 2, verified: true, date: new Date("2025-01-02"), location: "Site B" } as never,
     ]);
 
     const res = await rpc(app, bearer, "tools/call", {
@@ -207,20 +207,20 @@ describe("MCP tools/list and tools/call", () => {
     const app = await makeApp();
     const bearer = seedBearer();
     storageMock.createEntry.mockResolvedValueOnce({
-      id: 10, userId: 1, method: "SHOTCRETE", hours: 4,
+      id: 10, userId: 1, method: "CLASSROOM", hours: 4,
       location: "Plant 7", date: new Date("2025-05-19"), verified: false,
     } as never);
 
     const res = await rpc(app, bearer, "tools/call", {
       name: "create_entry",
-      arguments: { date: "2025-05-19", location: "Plant 7", method: "SHOTCRETE", hours: 4 },
+      arguments: { date: "2025-05-19", location: "Plant 7", method: "CLASSROOM", hours: 4 },
     });
     const payload = parseSseOrJson(res.text || res.body);
     expect(storageMock.createEntry).toHaveBeenCalledWith(expect.objectContaining({
-      userId: 1, location: "Plant 7", method: "SHOTCRETE", hours: 4,
+      userId: 1, location: "Plant 7", method: "CLASSROOM", hours: 4,
     }));
     const result = payload.result as { content: Array<{ text: string }> };
-    expect(result.content[0].text).toMatch(/Logged 4h of SHOTCRETE/);
+    expect(result.content[0].text).toMatch(/Logged 4h of CLASSROOM/);
   });
 
   it("request_verification sends a single-entry email when given one id", async () => {
@@ -230,7 +230,7 @@ describe("MCP tools/list and tools/call", () => {
       id: 99, userId: 1, name: "Sue", email: "sue@example.com", phone: "555",
     } as never);
     storageMock.getEntry.mockResolvedValueOnce({
-      id: 1, userId: 1, method: "DRILLING", hours: 3, verified: false,
+      id: 1, userId: 1, method: "ON_THE_JOB", hours: 3, verified: false,
       date: new Date("2025-01-01"), location: "X",
     } as never);
 
@@ -253,9 +253,9 @@ describe("MCP tools/list and tools/call", () => {
       id: 99, userId: 1, name: "Sue", email: "sue@example.com", phone: "555",
     } as never);
     storageMock.getEntry
-      .mockResolvedValueOnce({ id: 1, userId: 1, method: "DRILLING", hours: 3, verified: false,
+      .mockResolvedValueOnce({ id: 1, userId: 1, method: "ON_THE_JOB", hours: 3, verified: false,
         date: new Date("2025-01-01"), location: "X" } as never)
-      .mockResolvedValueOnce({ id: 2, userId: 1, method: "DRILLING", hours: 2, verified: false,
+      .mockResolvedValueOnce({ id: 2, userId: 1, method: "ON_THE_JOB", hours: 2, verified: false,
         date: new Date("2025-01-02"), location: "Y" } as never);
 
     const res = await rpc(app, bearer, "tools/call", {

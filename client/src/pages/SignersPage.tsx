@@ -157,7 +157,7 @@ export default function SignersPage() {
                 Signers
               </h2>
               <p className="text-sm text-neutral-500 mt-1">
-                Everyone at Access Limited shares this list. Anyone can add a signer, and every signer is available on every entry.
+                Everyone using this logbook shares this list. Anyone can add a signer, and every signer is available on every entry.
               </p>
             </div>
             <Button onClick={openAdd} className="flex items-center gap-2 h-12 text-base md:h-10 md:text-sm">

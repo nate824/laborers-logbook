@@ -29,7 +29,7 @@ export default function ResetPasswordPage() {
         <div className="bg-muted hidden md:block">
           <div className="flex h-full flex-col justify-center p-12 bg-gradient-to-b from-primary/20 to-background">
             <div className="space-y-6">
-              <h2 className="text-2xl font-bold text-primary">Access Limited Logbook</h2>
+              <h2 className="text-2xl font-bold text-primary">Laborers Logbook</h2>
               <p className="text-lg text-muted-foreground">
                 The secure way to track and verify your on-the-job training hours
               </p>

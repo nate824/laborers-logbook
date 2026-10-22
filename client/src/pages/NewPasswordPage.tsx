@@ -24,7 +24,7 @@ export default function NewPasswordPage() {
           <div className="mx-auto w-full max-w-md">
             <h1 className="text-3xl font-bold mb-2">Create New Password</h1>
             <p className="text-muted-foreground mb-8">
-              Choose a new password for your Access Limited Logbook account.
+              Choose a new password for your Laborers Logbook account.
             </p>
             <NewPasswordForm token={token} />
           </div>
@@ -32,7 +32,7 @@ export default function NewPasswordPage() {
         <div className="bg-muted hidden md:block">
           <div className="flex h-full flex-col justify-center p-12 bg-gradient-to-b from-primary/20 to-background">
             <div className="space-y-6">
-              <h2 className="text-2xl font-bold text-primary">Access Limited Logbook</h2>
+              <h2 className="text-2xl font-bold text-primary">Laborers Logbook</h2>
               <p className="text-lg text-muted-foreground">
                 The secure way to track and verify your on-the-job training hours
               </p>

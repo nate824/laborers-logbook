@@ -1,6 +1,7 @@
 import {
   users, entries, supervisors, ropeHours, userCryptoIdentities, apiTokens,
-  certifications,
+  certifications, fundReports, dispatchEvents,
+  type FundReport, type DispatchEvent,
   type User, type InsertUser,
   type Entry, type InsertEntry,
   type Supervisor, type InsertSupervisor, type SupervisorWithCreator,
@@ -10,6 +11,7 @@ import {
   type Certification, type InsertCertification,
   type VerificationAuditEvent, type VerificationAuditTrail
 } from "@shared/schema";
+import type { UnionProfile } from "@shared/union";
 
 import { db } from "./db";
 import { eq, and, desc, sql } from "drizzle-orm";
@@ -126,6 +128,16 @@ export interface IStorage {
   createApiToken(token: InsertApiToken): Promise<ApiToken>;
   touchApiToken(id: number): Promise<void>;
   deleteApiToken(id: number): Promise<void>;
+
+  // Union: profile, fund cross-check rows, out-of-work list history. Deletes
+  // take the owner so one member can never remove another's rows.
+  setUnionProfile(userId: number, profile: UnionProfile): Promise<User>;
+  getFundReports(userId: number): Promise<FundReport[]>;
+  createFundReport(row: Omit<FundReport, "id" | "createdAt">): Promise<FundReport>;
+  deleteFundReport(userId: number, id: number): Promise<boolean>;
+  getDispatchEvents(userId: number): Promise<DispatchEvent[]>;
+  createDispatchEvent(row: Omit<DispatchEvent, "id" | "createdAt">): Promise<DispatchEvent>;
+  deleteDispatchEvent(userId: number, id: number): Promise<boolean>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -568,6 +580,50 @@ export class DatabaseStorage implements IStorage {
 
   async deleteApiToken(id: number): Promise<void> {
     await db.delete(apiTokens).where(eq(apiTokens.id, id));
+  }
+
+  // Union methods
+  async setUnionProfile(userId: number, profile: UnionProfile): Promise<User> {
+    const [updated] = await db.update(users).set({ unionProfile: profile }).where(eq(users.id, userId)).returning();
+    return updated;
+  }
+
+  async getFundReports(userId: number): Promise<FundReport[]> {
+    return await db.select().from(fundReports).where(eq(fundReports.userId, userId)).orderBy(desc(fundReports.month));
+  }
+
+  async createFundReport(row: Omit<FundReport, "id" | "createdAt">): Promise<FundReport> {
+    const [created] = await db.insert(fundReports).values(row).returning();
+    return created;
+  }
+
+  async deleteFundReport(userId: number, id: number): Promise<boolean> {
+    const gone = await db
+      .delete(fundReports)
+      .where(and(eq(fundReports.id, id), eq(fundReports.userId, userId)))
+      .returning({ id: fundReports.id });
+    return gone.length > 0;
+  }
+
+  async getDispatchEvents(userId: number): Promise<DispatchEvent[]> {
+    return await db
+      .select()
+      .from(dispatchEvents)
+      .where(eq(dispatchEvents.userId, userId))
+      .orderBy(desc(dispatchEvents.date), desc(dispatchEvents.createdAt));
+  }
+
+  async createDispatchEvent(row: Omit<DispatchEvent, "id" | "createdAt">): Promise<DispatchEvent> {
+    const [created] = await db.insert(dispatchEvents).values(row).returning();
+    return created;
+  }
+
+  async deleteDispatchEvent(userId: number, id: number): Promise<boolean> {
+    const gone = await db
+      .delete(dispatchEvents)
+      .where(and(eq(dispatchEvents.id, id), eq(dispatchEvents.userId, userId)))
+      .returning({ id: dispatchEvents.id });
+    return gone.length > 0;
   }
 }
 

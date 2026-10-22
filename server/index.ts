@@ -138,6 +138,35 @@ async function runMigrations() {
     await client.query(`
       CREATE INDEX IF NOT EXISTS certifications_user_idx ON certifications(user_id);
     `);
+    // Union: the member's profile, fund cross-check rows and out-of-work list
+    // history (shared/union.ts holds the rules that read them).
+    await client.query(`
+      ALTER TABLE users ADD COLUMN IF NOT EXISTS union_profile JSON;
+    `);
+    await client.query(`
+      CREATE TABLE IF NOT EXISTS fund_reports (
+        id SERIAL PRIMARY KEY,
+        user_id INTEGER NOT NULL REFERENCES users(id),
+        month TEXT NOT NULL,
+        employer TEXT NOT NULL,
+        hours REAL NOT NULL,
+        note TEXT,
+        created_at TIMESTAMP DEFAULT NOW()
+      );
+      CREATE INDEX IF NOT EXISTS fund_reports_user_idx ON fund_reports(user_id);
+    `);
+    await client.query(`
+      CREATE TABLE IF NOT EXISTS dispatch_events (
+        id SERIAL PRIMARY KEY,
+        user_id INTEGER NOT NULL REFERENCES users(id),
+        date TIMESTAMP NOT NULL,
+        kind TEXT NOT NULL,
+        employer TEXT,
+        note TEXT,
+        created_at TIMESTAMP DEFAULT NOW()
+      );
+      CREATE INDEX IF NOT EXISTS dispatch_events_user_idx ON dispatch_events(user_id);
+    `);
     // OAuth 2.0 tables for MCP clients (claude.ai web, Cowork).
     await client.query(`
       CREATE TABLE IF NOT EXISTS oauth_clients (

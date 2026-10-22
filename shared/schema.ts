@@ -2,24 +2,22 @@ import { pgTable, text, serial, timestamp, integer, real, boolean, uuid, json } 
 import { sql } from "drizzle-orm";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
+import { CLASSIFICATIONS, DISPATCH_KINDS, type UnionProfile } from "./union";
 
-// Access Limited field-hours methods: one column each in the Field Hours
-// daily log. Adding a key here (plus a label) adds a column to the log,
-// totals, picker and API. What each method records beyond date/location/hours
-// comes from FIELD_METHOD_DETAILS below (the ACL paper logbook pages).
-// Rope access is NOT here: it has its own Rope Hours log (ropeHours table).
+// Work Hours log kinds: one column each in the daily log. ON_THE_JOB hours
+// count toward health eligibility (union jobs only) and apprentice OJT;
+// CLASSROOM hours are apprentice related/supplemental instruction (RSI).
+// The rules that use them live in shared/union.ts.
 export const FieldMethods = {
-  DRILLING: "DRILLING",
-  SHOTCRETE: "SHOTCRETE",
-  SCALING: "SCALING",
+  ON_THE_JOB: "ON_THE_JOB",
+  CLASSROOM: "CLASSROOM",
 } as const;
 
 export type FieldMethod = keyof typeof FieldMethods;
 
 export const FIELD_METHOD_LABELS: Record<FieldMethod, string> = {
-  DRILLING: "Drilling",
-  SHOTCRETE: "Shotcrete",
-  SCALING: "Scaling",
+  ON_THE_JOB: "On the job",
+  CLASSROOM: "Class / training",
 };
 
 // Human-friendly label for a field method (UI display only).
@@ -27,11 +25,10 @@ export function fieldMethodLabel(method: string): string {
   return FIELD_METHOD_LABELS[method as FieldMethod] ?? method;
 }
 
-// Extra per-method fields, taken from the columns of the ACL paper logbook
-// (Drilling Log, Nozzleman Log). Stored as strings in entries.details, all
-// optional so a quick entry in the field still saves. A "choice" field is one
-// the paper log has you circle (Dry / Wet); `multiple` allows circling both,
-// stored comma-joined ("Vert.,Horz.").
+// Extra per-kind fields, stored as strings in entries.details, all optional
+// so a quick entry on the job still saves. A "choice" field renders as
+// tap-to-pick options. `union` is what the hour bank reads: non-union work in
+// the jurisdiction zeroes it (shared/union.ts).
 export type FieldDetailSpec = {
   key: string;
   label: string;
@@ -42,25 +39,20 @@ export type FieldDetailSpec = {
 };
 
 export const FIELD_METHOD_DETAILS: Record<FieldMethod, FieldDetailSpec[]> = {
-  DRILLING: [
+  ON_THE_JOB: [
+    { key: "employer", label: "Employer", placeholder: "Contractor you worked for" },
+    { key: "union", label: "Union job?", input: "choice", options: ["Union", "Non-union"] },
     { key: "jobNumber", label: "Job #" },
-    { key: "type", label: "Type", placeholder: "e.g. Soil nail, rock bolt" },
-    { key: "drill", label: "Drill", placeholder: "Drill / rig used" },
-    { key: "holeDepthSize", label: "Hole depth & size", placeholder: "e.g. 20' x 3.5\"" },
-    { key: "totalLf", label: "Total LF", input: "number" },
-    { key: "conditions", label: "Drilling conditions", placeholder: "e.g. Fractured rock, wet" },
-    { key: "angle", label: "Angle", placeholder: "e.g. 15° down" },
+    { key: "county", label: "County", placeholder: "e.g. Kern" },
+    // Placeholder categories until we have the JAC's Work Process list.
+    { key: "workProcess", label: "Work process", placeholder: "e.g. Concrete, demo, traffic control" },
+    { key: "overtime", label: "of which overtime hrs", input: "number" },
+    { key: "doubleTime", label: "of which double-time hrs", input: "number" },
   ],
-  SHOTCRETE: [
-    { key: "jobNumber", label: "Job #" },
-    { key: "employer", label: "Employer" },
-    { key: "process", label: "Dry / Wet", input: "choice", options: ["Dry", "Wet"] },
-    { key: "sqft", label: "Sq ft", input: "number" },
-    { key: "orientation", label: "Vert. / Horz.", input: "choice", options: ["Vert.", "Horz."], multiple: true },
-    { key: "endDate", label: "End date", input: "date" },
-    { key: "thickness", label: "Thickness", placeholder: "e.g. 4\"" },
+  CLASSROOM: [
+    { key: "course", label: "Course", placeholder: "e.g. OSHA 30, Confined Space" },
+    { key: "school", label: "School / site", placeholder: "e.g. LTS Bakersfield" },
   ],
-  SCALING: [{ key: "jobNumber", label: "Job #" }],
 };
 
 export type EntryDetails = Record<string, string>;
@@ -82,14 +74,17 @@ export function cleanEntryDetails(method: string, details: EntryDetails | null |
 
 // One-line summary of an entry's details for cards and the verify page,
 // e.g. "Job # 2231 · Soil nail · 120 LF".
+// One-line summary of an entry's details for cards and the verify page,
+// e.g. "Granite Construction · Job # 2231 · Non-union · 2 OT".
 export function entryDetailsSummary(method: string, details: EntryDetails | null | undefined): string {
   return fieldMethodDetails(method)
     .filter((s) => details?.[s.key])
+    .filter((s) => !(s.key === "union" && details![s.key] === "Union"))
     .map((s) => {
       const v = details![s.key];
       if (s.key === "jobNumber") return `Job # ${v}`;
-      if (s.key === "totalLf") return `${v} LF`;
-      if (s.key === "sqft") return `${v} sq ft`;
+      if (s.key === "overtime") return `${v} OT`;
+      if (s.key === "doubleTime") return `${v} DT`;
       if (s.input === "date") return `${s.label} ${v}`;
       return v.split(",").join(" / ");
     })
@@ -177,6 +172,8 @@ export const users = pgTable("users", {
   shareToken: text("share_token").unique(),
   shareTokenCreatedAt: timestamp("share_token_created_at"),
   shareSettings: json("share_settings").$type<ShareSettings>(),
+  // Classification, prior apprentice hours, dues paid through… (shared/union.ts)
+  unionProfile: json("union_profile").$type<UnionProfile>(),
 });
 
 export const insertUserSchema = createInsertSchema(users).pick({
@@ -308,11 +305,10 @@ export const certifications = pgTable("certifications", {
 
 // Common issuing bodies. The form still accepts free text via "Other".
 export const CERT_ISSUING_BODIES = [
-  "ASNT",
-  "IRATA",
-  "SPRAT",
-  "API",
-  "AWS",
+  "Laborers Training School",
+  "OSHA",
+  "CDPH",
+  "American Red Cross",
   "Employer",
   "Other",
 ] as const;
@@ -500,6 +496,58 @@ export const insertSupervisorCryptoIdentitySchema = createInsertSchema(superviso
   publicKey: true,
   encryptedPrivateKey: true,
   professionalInfo: true,
+});
+
+// ---------------- Union ------------------------------------------------------
+// Hours the trust fund shows for a month and employer, copied by the member
+// from the fund's portal or statement, to check against their own log.
+export const fundReports = pgTable("fund_reports", {
+  id: serial("id").primaryKey(),
+  userId: integer("user_id").notNull().references(() => users.id),
+  month: text("month").notNull(), // "YYYY-MM" work month
+  employer: text("employer").notNull(),
+  hours: real("hours").notNull(),
+  note: text("note"),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+export const fundReportWriteSchema = z.object({
+  month: z.string().regex(/^\d{4}-(0[1-9]|1[0-2])$/, "Pick a month"),
+  employer: z.string().trim().min(1).max(200),
+  hours: z.coerce.number().min(0).max(744),
+  note: z.string().max(500).nullish(),
+});
+
+export type FundReport = typeof fundReports.$inferSelect;
+
+// The member's own out-of-work list history: sign-ins, re-registrations,
+// dispatches and layoffs. The hiring hall's list is the official one.
+export const dispatchEvents = pgTable("dispatch_events", {
+  id: serial("id").primaryKey(),
+  userId: integer("user_id").notNull().references(() => users.id),
+  date: timestamp("date").notNull(), // calendar date, UTC midnight
+  kind: text("kind").notNull(), // a DISPATCH_KINDS key
+  employer: text("employer"),
+  note: text("note"),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+export const dispatchEventWriteSchema = z.object({
+  date: z.coerce.date(),
+  kind: z.enum(Object.keys(DISPATCH_KINDS) as [string, ...string[]]),
+  employer: z.string().max(200).nullish(),
+  note: z.string().max(500).nullish(),
+});
+
+export type DispatchEvent = typeof dispatchEvents.$inferSelect;
+
+export const unionProfileSchema = z.object({
+  classification: z.enum(Object.keys(CLASSIFICATIONS) as [keyof typeof CLASSIFICATIONS, ...(keyof typeof CLASSIFICATIONS)[]]),
+  localNumber: z.string().trim().max(10),
+  priorOjtHours: z.coerce.number().min(0).max(20000),
+  priorRsiHours: z.coerce.number().min(0).max(2000),
+  startingBank: z.coerce.number().min(0).max(400),
+  duesPaidThrough: z.string().regex(/^\d{4}-(0[1-9]|1[0-2])$/).nullable(),
 });
 
 // Types

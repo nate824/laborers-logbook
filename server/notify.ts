@@ -56,7 +56,7 @@ export function normalizePhone(raw: string | null | undefined, defaultCountryCod
 // Keep it short: one SMS segment where possible. The link is last so phones
 // render it as a tappable URL.
 export function buildSignatureSms(opts: { requester: string; summary: string; url: string }) {
-  return `Access Limited Logbook: ${opts.requester} asked you to sign off ${opts.summary}. Review and sign: ${opts.url}`;
+  return `Laborers Logbook: ${opts.requester} asked you to sign off ${opts.summary}. Review and sign: ${opts.url}`;
 }
 
 export function parseChannels(input: unknown): Channel[] {

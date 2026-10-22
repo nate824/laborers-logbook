@@ -147,7 +147,7 @@ export function buildLogSheet(spec: LogSheetSpec): jsPDF {
       doc.text(spec.person.employeeNumber, MARGIN + 100, MARGIN + 4);
     }
     doc.setFont("helvetica", "bold");
-    doc.text("Access Limited", MARGIN + TABLE_W, MARGIN + 4, { align: "right" });
+    doc.text("Laborers Logbook", MARGIN + TABLE_W, MARGIN + 4, { align: "right" });
 
     // Black title bar, white title — like the logbook page heading.
     doc.setFillColor(0, 0, 0);

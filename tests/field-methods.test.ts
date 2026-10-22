@@ -32,31 +32,30 @@ describe("Field Hours methods", () => {
   });
 
   it("labels methods for display", () => {
-    expect(fieldMethodLabel("DRILLING")).toBe("Drilling");
-    expect(fieldMethodLabel("SHOTCRETE")).toBe("Shotcrete");
-    expect(fieldMethodLabel("SCALING")).toBe("Scaling");
+    expect(fieldMethodLabel("ON_THE_JOB")).toBe("On the job");
+    expect(fieldMethodLabel("CLASSROOM")).toBe("Class / training");
     expect(signerMethodLabel("ROPE_ACCESS")).toBe("Rope Access");
   });
 });
 
 describe("Field method logbook details", () => {
-  it("keeps only the current method's fields, trimmed, without blanks", () => {
-    const draft = { jobNumber: " 2231 ", totalLf: "120", sqft: "400", angle: "  " };
-    expect(cleanEntryDetails("DRILLING", draft)).toEqual({ jobNumber: "2231", totalLf: "120" });
-    expect(cleanEntryDetails("SHOTCRETE", draft)).toEqual({ jobNumber: "2231", sqft: "400" });
-    expect(cleanEntryDetails("SCALING", null)).toEqual({});
+  it("keeps only the current kind's fields, trimmed, without blanks", () => {
+    const draft = { employer: " Granite ", course: "OSHA 30", jobNumber: "  " };
+    expect(cleanEntryDetails("ON_THE_JOB", draft)).toEqual({ employer: "Granite" });
+    expect(cleanEntryDetails("CLASSROOM", draft)).toEqual({ course: "OSHA 30" });
+    expect(cleanEntryDetails("CLASSROOM", null)).toEqual({});
   });
 
-  it("summarizes details for cards and the verify page", () => {
-    expect(entryDetailsSummary("DRILLING", { jobNumber: "2231", type: "Soil nail", totalLf: "120" })).toBe(
-      "Job # 2231 · Soil nail · 120 LF",
+  it("summarizes details for cards and the verify page, hiding the default Union", () => {
+    expect(entryDetailsSummary("ON_THE_JOB", { employer: "Granite", union: "Union", jobNumber: "2231", overtime: "2" })).toBe(
+      "Granite · Job # 2231 · 2 OT",
     );
-    expect(entryDetailsSummary("SHOTCRETE", { process: "Wet", orientation: "Vert.,Horz." })).toBe("Wet · Vert. / Horz.");
+    expect(entryDetailsSummary("ON_THE_JOB", { employer: "Bob's Paving", union: "Non-union" })).toBe("Bob's Paving · Non-union");
   });
 
-  it("accepts details on a field-hours entry", () => {
-    expect(insertEntrySchema.parse({ ...base, method: "DRILLING", details: { totalLf: "120" } }).details).toEqual({
-      totalLf: "120",
+  it("accepts details on a work-hours entry", () => {
+    expect(insertEntrySchema.parse({ ...base, method: "ON_THE_JOB", details: { employer: "Granite" } }).details).toEqual({
+      employer: "Granite",
     });
   });
 

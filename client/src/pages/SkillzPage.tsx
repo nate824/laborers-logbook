@@ -22,9 +22,8 @@ const ORIGIN = typeof window !== "undefined" ? window.location.origin : "https:/
 type MethodInfo = { code: string; name: string; aliases: string };
 
 const METHODS: MethodInfo[] = [
-  { code: "DRILLING", name: "Drilling", aliases: "drilling, drill, rock drilling" },
-  { code: "SHOTCRETE", name: "Shotcrete", aliases: "shotcrete, nozzle, nozzling" },
-  { code: "SCALING", name: "Scaling", aliases: "scaling, scale, bar scaling, rock scaling" },
+  { code: "ON_THE_JOB", name: "On the job", aliases: "worked, on the job, shift, day on site" },
+  { code: "CLASSROOM", name: "Class / training", aliases: "class, training, school, OSHA course" },
 ];
 
 const ROPE_SKILLS = [
@@ -45,13 +44,13 @@ const ROPE_SKILLS = [
 function buildSkillMd(origin: string): string {
   return `---
 name: acl-field-logbook
-description: Log Access Limited field hours (drilling, shotcrete) and rope-access hours to the ACL Logbook and request supervisor verification, from plain language like "10 hours drilling at I-70 today".
+description: Log union work hours (on the job, class) to the Laborers Logbook and request supervisor verification, from plain language like "10 hours for Granite on Hwy 58 today".
 ---
 
-# Access Limited Field Logbook
+# Laborers Logbook
 
-Use this skill to record daily field hours (drilling, shotcrete) and rope-access
-hours in the ACL Logbook, and to send entries to a supervisor for verification.
+Use this skill to record daily union work hours and rope-access
+hours in the Laborers Logbook, and to send entries to a supervisor for verification.
 
 ## Setup (one time)
 The user must give you a personal API token. If you don't have one, ask for it.
@@ -65,7 +64,7 @@ All requests and responses are JSON. Always send: Content-Type: application/json
 
 ## When to act
 Trigger when the user describes field or rope hours, e.g.
-"10 hours drilling at I-70 today", "log 6h shotcrete yesterday at Glenwood",
+"10 hours for Granite on Hwy 58 today", "log 8h OSHA class yesterday",
 "3 days rope access at Glenwood Canyon, 30 hours, ascent and descent".
 
 Always:
@@ -87,7 +86,8 @@ Interpret relative dates in the user's local time, then send ISO YYYY-MM-DD.
 
 ## Log a field-hours entry
 POST ${origin}/api/entries
-Body: { "date": "2026-06-06", "location": "I-70 Glenwood", "method": "DRILLING", "hours": 10 }
+Body: { "date": "2026-06-06", "location": "Hwy 58 Bakersfield", "method": "ON_THE_JOB", "hours": 10,
+        "details": { "employer": "Granite Construction", "union": "Union", "overtime": "2" } }
 - hours: number, typically 0-24 for one day ; location: free text ; method: a code above.
 - The response includes the new entry's "id".
 - To log several at once, POST an ARRAY of those objects.
@@ -117,9 +117,9 @@ Body: {
                      POST ${origin}/api/verify-request-rope/{id}    Body: { "supervisorId": 123 }
 Pick the signer by name if the user names one; otherwise ask which to use.
 
-## Worked example: "10 hours drilling at I-70 today"
-1. Parse -> date=today, location="I-70", method="DRILLING", hours=10.
-2. Say: "Logging 10h drilling at I-70 on <today> - go ahead?"
+## Worked example: "10 hours for Granite on Hwy 58 today"
+1. Parse -> date=today, location="Hwy 58", method="ON_THE_JOB", hours=10, details.employer="Granite".
+2. Say: "Logging 10h on the job for Granite at Hwy 58 on <today> - go ahead?"
 3. POST /api/entries with that body; keep the returned id.
 4. Ask: "Send it to a supervisor for verification?"
 5. If yes: choose supervisorId, then POST /api/verify-request/{id} with it.
@@ -195,7 +195,7 @@ export default function SkillzPage() {
         <div className="max-w-4xl mx-auto px-4 sm:px-6 py-4 flex items-center justify-between gap-4">
           <div className="flex items-center gap-2">
             <Bot className="h-6 w-6 text-primary" />
-            <span className="font-semibold">ACL Logbook — Skillz</span>
+            <span className="font-semibold">Laborers Logbook — Skillz</span>
           </div>
           <Link href="/field-hours">
             <Button variant="outline" size="sm">
@@ -218,7 +218,7 @@ export default function SkillzPage() {
           </h1>
           <p className="text-muted-foreground max-w-2xl mx-auto">
             Hook up a Claude coworker once, then say things like{" "}
-            <span className="font-medium text-foreground">"10 hours drilling at I-70 today"</span> and it
+            <span className="font-medium text-foreground">"10 hours for Granite on Hwy 58 today"</span> and it
             will add the entry and send it off for supervisor verification — no forms.
           </p>
         </section>
@@ -390,17 +390,17 @@ export default function SkillzPage() {
             <div>
               <h3 className="font-medium mb-2">Things you can say</h3>
               <ul className="list-disc list-inside text-muted-foreground space-y-1">
-                <li>"10 hours drilling at I-70 today"</li>
+                <li>"10 hours for Granite on Hwy 58 today"</li>
                 <li>"Log 6h shotcrete yesterday at Glenwood, then send it to John for verification"</li>
                 <li>"3 days rope access at Glenwood Canyon, 30 hours — ascent, descent and hauling"</li>
-                <li>"What are my verified drilling hours so far?"</li>
+                <li>"What are my verified union hours this month?"</li>
               </ul>
             </div>
           </CardContent>
         </Card>
 
         <p className="text-center text-xs text-muted-foreground pb-4">
-          Powered by the ACL Logbook MCP server at <code>{ORIGIN}/mcp</code>
+          Powered by the Laborers Logbook MCP server at <code>{ORIGIN}/mcp</code>
         </p>
       </main>
     </div>

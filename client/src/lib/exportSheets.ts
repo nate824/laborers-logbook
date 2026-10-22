@@ -1,12 +1,12 @@
 import { formatCalendarDate, todayLocalISODate } from "@shared/dates";
 import { Certification, Entry, RopeHours, Supervisor, User, fieldMethodLabel } from "@shared/schema";
-import { buildLogSheet, type LogSheetSpec, type SheetCell } from "@/lib/logSheet";
+import { buildLogSheet, type LogSheetSpec } from "@/lib/logSheet";
 
-// Builds the export PDFs in the layout of the Access Limited paper logbook:
-// one sheet per field method (Drilling Log, Nozzleman Log …) and the
-// "Work Log - Rope Hours" page, plus SPRAT- and IRATA-style rope sheets for
-// certification bodies. Only verified (signed-off or imported from a signed
-// log) records are exported.
+// Builds the export PDFs: a Work Hours Log (on-the-job days, by employer,
+// with overtime) and a Class / Training Log, plus the inherited rope sheets.
+// Only verified (signed-off or imported from a signed log) records are
+// exported — this is the member's backup record for the hall, the trust fund
+// and the JAC.
 
 export type RopeSheetStyle = "acl" | "sprat" | "irata";
 
@@ -20,13 +20,12 @@ export interface ExportFile {
 }
 
 const FOOTNOTE =
-  "Signatures are digital sign-offs recorded in the Access Limited Logbook: each row was confirmed by the named signer through a unique verification link, or imported from a signed paper log.";
+  "Member's own record, kept in the Laborers Logbook (unofficial). Signatures are digital sign-offs: each row was confirmed by the named foreman through a unique verification link, or imported from a signed paper log.";
 
 // Sheet title per method, as printed in the logbook.
 const FIELD_LOG_TITLES: Record<string, string> = {
-  DRILLING: "Drilling Log",
-  SHOTCRETE: "Nozzleman Log",
-  SCALING: "Scaling Log",
+  ON_THE_JOB: "Work Hours Log",
+  CLASSROOM: "Class / Training Log",
 };
 
 export function fieldLogTitle(method: string) {
@@ -75,10 +74,6 @@ function num(v: string | undefined) {
   return Number.isFinite(n) ? n : 0;
 }
 
-function choice(options: string[], value: string | undefined): SheetCell {
-  return { choices: options, selected: value ? value.split(",") : [] };
-}
-
 // Two logbook fields that share one column ("Hole Depth & Size / Total LF").
 function stacked(...parts: (string | undefined)[]) {
   return parts.filter(Boolean).join("\n");
@@ -91,64 +86,48 @@ export function fieldHoursSpec(entries: Entry[], method: string, user: Person): 
   const d = (e: Entry) => e.details ?? {};
   const base = { title: fieldLogTitle(method), person: personOf(user), footnote: FOOTNOTE };
 
-  if (method === "DRILLING") {
-    // Logbook pages 110–111.
+  if (method === "ON_THE_JOB") {
     return {
       ...base,
       columns: [
-        { header: "Type", width: 14 },
-        { header: "Drill", width: 14 },
-        { header: "Hole Depth & Size\nTotal LF", width: 15 },
-        { header: "Drilling Conditions &\nAngle", width: 18 },
-        { header: "Supervisor Signature", width: 20 },
-        { header: "Date", width: 10 },
-        { header: "Job #", width: 9 },
-      ],
-      rows: rows.map((e) => [
-        d(e).type ?? "",
-        d(e).drill ?? "",
-        stacked(d(e).holeDepthSize, d(e).totalLf && `${d(e).totalLf} LF`),
-        stacked(d(e).conditions, d(e).angle),
-        signatureCell(e),
-        formatCalendarDate(e.date),
-        d(e).jobNumber ?? "",
-      ]),
-      totals: [{ label: "LF", values: rows.map((e) => num(d(e).totalLf)) }],
-    };
-  }
-
-  if (method === "SHOTCRETE") {
-    // Logbook pages 127–128 ("Nozzelman Log").
-    return {
-      ...base,
-      columns: [
-        { header: "Job #", width: 8 },
-        { header: "Employer", width: 13 },
-        { header: "Dry Wet", width: 9 },
+        { header: "Date", width: 9 },
+        { header: "Employer", width: 15 },
+        { header: "Union /\nNon-union", width: 9 },
+        { header: "Job #\nCounty", width: 10 },
+        { header: "Work Process", width: 15 },
         { header: "Hours", width: 6, align: "right" },
-        { header: "SQ FT", width: 7, align: "right" },
-        { header: "Vert. Horz.", width: 10 },
-        { header: "Start Date", width: 9 },
-        { header: "End Date", width: 9 },
-        { header: "Thickness", width: 8 },
-        { header: "Supervisor Signature", width: 21 },
+        { header: "OT / DT", width: 7, align: "right" },
+        { header: "Foreman Signature", width: 22 },
       ],
       rows: rows.map((e) => [
-        d(e).jobNumber ?? "",
-        d(e).employer ?? "",
-        choice(["Dry", "Wet"], d(e).process),
-        String(e.hours),
-        d(e).sqft ?? "",
-        choice(["Vert.", "Horz."], d(e).orientation),
         formatCalendarDate(e.date),
-        formatCalendarDate(d(e).endDate || e.date),
-        d(e).thickness ?? "",
+        d(e).employer ?? "",
+        d(e).union ?? "Union",
+        stacked(d(e).jobNumber, d(e).county),
+        d(e).workProcess ?? "",
+        String(e.hours),
+        [d(e).overtime, d(e).doubleTime].some(Boolean) ? `${d(e).overtime || 0} / ${d(e).doubleTime || 0}` : "",
         signatureCell(e),
       ]),
       totals: [
         { label: "Hours", values: rows.map((e) => e.hours) },
-        { label: "SQ FT", values: rows.map((e) => num(d(e).sqft)) },
+        { label: "OT", values: rows.map((e) => num(d(e).overtime)) },
       ],
+    };
+  }
+
+  if (method === "CLASSROOM") {
+    return {
+      ...base,
+      columns: [
+        { header: "Date", width: 12 },
+        { header: "Course", width: 28 },
+        { header: "School / Site", width: 22 },
+        { header: "Hours", width: 8, align: "right" },
+        { header: "Instructor Signature", width: 30 },
+      ],
+      rows: rows.map((e) => [formatCalendarDate(e.date), d(e).course ?? "", d(e).school ?? e.location, String(e.hours), signatureCell(e)]),
+      totals: [{ label: "Hours", values: rows.map((e) => e.hours) }],
     };
   }
 
@@ -294,7 +273,7 @@ export function fieldHoursExports(entries: Entry[], user: Person, methods: strin
     return {
       key: method,
       label: fieldLogTitle(method),
-      fileName: `ACL_${safeName(fieldLogTitle(method))}_${safeName(user.name || "")}_${stamp}.pdf`,
+      fileName: `Laborers_${safeName(fieldLogTitle(method))}_${safeName(user.name || "")}_${stamp}.pdf`,
       count: verified.length,
       hours: verified.reduce((s, e) => s + e.hours, 0),
       build: () => toBlob(fieldHoursSpec(entries, method, user)),

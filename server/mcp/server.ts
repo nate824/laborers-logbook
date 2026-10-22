@@ -1,4 +1,4 @@
-// MCP server module — exposes Access Limited Logbook tools to Claude (or any
+// MCP server module — exposes Laborers Logbook tools to Claude (or any
 // MCP-compatible client) over Streamable HTTP at /mcp.
 //
 // Auth is handled upstream by the requireAuthOrToken middleware in
@@ -457,7 +457,7 @@ function buildServer(userId: number): McpServer {
   // -------- Supervisors --------
   server.tool(
     "list_supervisors",
-    "List every signer (supervisor) on the shared Access Limited signer list. Any of them can be used for verification requests.",
+    "List every signer (supervisor) on the shared signer list. Any of them can be used for verification requests.",
     {},
     async () => {
       const sups = await storage.getSupervisors();

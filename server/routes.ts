@@ -63,6 +63,7 @@ import {
 } from "./forms/types";
 import { handleMcpRequest, takeExport } from "./mcp/server";
 import { registerOauthRoutes } from "./oauth/routes";
+import { registerUnionRoutes } from "./unionRoutes";
 import {
   getValidAccessTokenByRaw as getOauthAccessTokenByRaw,
   touchAccessToken as touchOauthAccessToken,
@@ -473,7 +474,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Create email HTML
       const html = `
         <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto;">
-          <h2>Access Limited Logbook - Password Reset</h2>
+          <h2>Laborers Logbook - Password Reset</h2>
           <p>You recently requested to reset your password. Click the button below to reset it:</p>
           
           <p>
@@ -494,7 +495,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Send email
       const emailSent = await sendEmail(
         user.email,
-        "Reset your Access Limited Logbook password",
+        "Reset your Laborers Logbook password",
         html,
       );
 
@@ -2528,6 +2529,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // ---------- Certifications (technician credentials vault) ----------
+  registerUnionRoutes(app, requireAuth as any);
+
   app.get("/api/certifications", requireAuthOrToken, async (req, res) => {
     try {
       const certs = await storage.getCertifications(req.session.userId!);

@@ -33,60 +33,45 @@ describe("paginateRows", () => {
 });
 
 describe("field hours sheets", () => {
-  const entries = [
-    entry(3, "SCALING", true), entry(1, "SCALING", true), entry(2, "SCALING", false),
-    entry(4, "DRILLING", true),
-  ];
+  const job = (id: number, verified: boolean, details: Record<string, string> = {}) =>
+    ({ ...entry(id, "ON_THE_JOB", verified), details: { employer: "Granite", union: "Union", ...details } }) as Entry;
+  const entries = [job(3, true), job(1, true, { overtime: "2" }), job(2, false), entry(4, "CLASSROOM", true)];
 
-  it("has one row per verified entry of that method, oldest first", () => {
-    const spec = fieldHoursSpec(entries, "SCALING", user);
+  it("work hours use the Work Hours Log columns, oldest first, verified only", () => {
+    const spec = fieldHoursSpec(entries, "ON_THE_JOB", user);
+    expect(spec.title).toBe("Work Hours Log");
+    expect(spec.columns.map((c) => c.header)).toEqual([
+      "Date", "Employer", "Union /\nNon-union", "Job #\nCounty", "Work Process", "Hours", "OT / DT", "Foreman Signature",
+    ]);
     expect(spec.rows).toHaveLength(2);
-    expect(spec.rows.map((r) => r[2])).toEqual(["Site 1", "Site 3"]);
-    expect(spec.columns.map((c) => c.header)).toEqual(["Date", "Job #", "Location", "Hours Worked", "Supervisor Signature"]);
-    expect(spec.rows[0][4]).toMatch(/^Riley Super\nVerified /);
-  });
-
-  it("drilling uses the logbook's Drilling Log columns and totals LF", () => {
-    const drilled = {
-      ...entry(6, "DRILLING", true),
-      details: { jobNumber: "2231", type: "Soil nail", drill: "Track drill", holeDepthSize: "20' x 3.5\"", totalLf: "120", conditions: "Fractured rock", angle: "15° down" },
-    } as Entry;
-    const spec = fieldHoursSpec([drilled], "DRILLING", user);
-    expect(spec.title).toBe("Drilling Log");
-    expect(spec.columns.map((c) => c.header)).toEqual([
-      "Type", "Drill", "Hole Depth & Size\nTotal LF", "Drilling Conditions &\nAngle", "Supervisor Signature", "Date", "Job #",
-    ]);
-    expect(spec.rows[0].slice(0, 4)).toEqual(["Soil nail", "Track drill", "20' x 3.5\"\n120 LF", "Fractured rock\n15° down"]);
-    expect(spec.rows[0][6]).toBe("2231");
-    expect(spec.totals).toEqual([{ label: "LF", values: [120] }]);
-  });
-
-  it("shotcrete uses the Nozzleman Log columns with circled choices", () => {
-    const shot = {
-      ...entry(7, "SHOTCRETE", true),
-      details: { jobNumber: "88", employer: "Access Limited", process: "Wet", sqft: "400", orientation: "Vert.,Horz.", endDate: "2026-10-09", thickness: "4\"" },
-    } as Entry;
-    const spec = fieldHoursSpec([shot], "SHOTCRETE", user);
-    expect(spec.title).toBe("Nozzleman Log");
-    expect(spec.columns.map((c) => c.header)).toEqual([
-      "Job #", "Employer", "Dry Wet", "Hours", "SQ FT", "Vert. Horz.", "Start Date", "End Date", "Thickness", "Supervisor Signature",
-    ]);
-    expect(spec.rows[0][2]).toEqual({ choices: ["Dry", "Wet"], selected: ["Wet"] });
-    expect(spec.rows[0][5]).toEqual({ choices: ["Vert.", "Horz."], selected: ["Vert.", "Horz."] });
-    expect(spec.totals.map((t) => t.label)).toEqual(["Hours", "SQ FT"]);
+    expect(spec.rows[0].slice(1, 3)).toEqual(["Granite", "Union"]);
+    expect(spec.rows[0][6]).toBe("2 / 0");
+    expect(spec.rows[0][7]).toMatch(/^Riley Super\nVerified /);
+    expect(spec.totals.map((t) => t.label)).toEqual(["Hours", "OT"]);
     expect(() => buildLogSheet(spec)).not.toThrow();
   });
 
-  it("makes one file per method and counts only verified hours", () => {
-    const files = fieldHoursExports(entries, user, ["DRILLING", "SHOTCRETE", "SCALING"]);
-    expect(files.map((f) => [f.key, f.count])).toEqual([["DRILLING", 1], ["SHOTCRETE", 0], ["SCALING", 2]]);
-    expect(files[1].label).toBe("Nozzleman Log");
-    expect(files[2].fileName).toMatch(/^ACL_Scaling_Log_Sam_Tech_\d{4}-\d{2}-\d{2}\.pdf$/);
+  it("class hours use the Class / Training Log", () => {
+    const cls = { ...entry(4, "CLASSROOM", true), details: { course: "OSHA 30", school: "LTS Bakersfield" } } as Entry;
+    const spec = fieldHoursSpec([cls], "CLASSROOM", user);
+    expect(spec.title).toBe("Class / Training Log");
+    expect(spec.rows[0].slice(1, 3)).toEqual(["OSHA 30", "LTS Bakersfield"]);
+  });
+
+  it("makes one file per kind and counts only verified hours", () => {
+    const files = fieldHoursExports(entries, user, ["ON_THE_JOB", "CLASSROOM"]);
+    expect(files.map((f) => [f.key, f.count])).toEqual([["ON_THE_JOB", 2], ["CLASSROOM", 1]]);
+    expect(files[0].fileName).toMatch(/^Laborers_Work_Hours_Log_Sam_Tech_\d{4}-\d{2}-\d{2}\.pdf$/);
+  });
+
+  it("falls back to a simple daily sheet for an unknown kind", () => {
+    const spec = fieldHoursSpec([entry(1, "OTHER", true)], "OTHER", user);
+    expect(spec.columns.map((c) => c.header)).toEqual(["Date", "Job #", "Location", "Hours Worked", "Supervisor Signature"]);
   });
 
   it("labels imported rows with the signed paper log", () => {
-    const imported = { ...entry(5, "SCALING", true), importedAt: new Date(), sourceDocumentName: "log.pdf" } as Entry;
-    expect(fieldHoursSpec([imported], "SCALING", user).rows[0][4]).toBe("Signed paper log: log.pdf");
+    const imported = { ...job(5, true), importedAt: new Date(), sourceDocumentName: "log.pdf" } as Entry;
+    expect(fieldHoursSpec([imported], "ON_THE_JOB", user).rows[0][7]).toBe("Signed paper log: log.pdf");
   });
 });
 
@@ -137,8 +122,8 @@ describe("rope sheets", () => {
 
 describe("buildLogSheet", () => {
   it("renders exactly the logged rows across pages, with page and running totals", () => {
-    const many = Array.from({ length: 30 }, (_, i) => entry(i + 1, "SCALING", true, `2026-0${1 + Math.floor(i / 28)}-${String((i % 28) + 1).padStart(2, "0")}`));
-    const spec = fieldHoursSpec(many, "SCALING", user);
+    const many = Array.from({ length: 30 }, (_, i) => entry(i + 1, "OTHER", true, `2026-0${1 + Math.floor(i / 28)}-${String((i % 28) + 1).padStart(2, "0")}`));
+    const spec = fieldHoursSpec(many, "OTHER", user);
     const doc = buildLogSheet(spec);
     const pages = doc.getNumberOfPages();
     expect(pages).toBeGreaterThan(1);
@@ -152,6 +137,6 @@ describe("buildLogSheet", () => {
   });
 
   it("refuses an empty sheet", () => {
-    expect(() => buildLogSheet({ ...fieldHoursSpec([], "SCALING", user) })).toThrow();
+    expect(() => buildLogSheet({ ...fieldHoursSpec([], "ON_THE_JOB", user) })).toThrow();
   });
 });

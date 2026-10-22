@@ -22,7 +22,7 @@ export async function sendEmail(
       {
         from: {
           email: "noreply@trackerloger.online",
-          name: "Access Limited Logbook",
+          name: "Laborers Logbook",
         },
         to: [
           {
@@ -62,10 +62,10 @@ export async function sendMagicLinkEmail(
 
   const emailSent = await sendEmail(
     email,
-    "Your Access Limited Logbook Login Link",
+    "Your Laborers Logbook Login Link",
     `
     <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto;">
-      <h2>Access Limited Logbook - Magic Link</h2>
+      <h2>Laborers Logbook - Magic Link</h2>
       <p>Click the button below to log in to your account:</p>
       <p>
         <a 

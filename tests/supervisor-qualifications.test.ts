@@ -9,17 +9,17 @@ describe("canonicalizeSupervisorWrite", () => {
     const result = canonicalizeSupervisorWrite({
       name: "Jane",
       qualifications: [
-        { method: "DRILLING", level: "Level III" },
-        { method: "SHOTCRETE", level: "Level II" },
+        { method: "ON_THE_JOB", level: "Level III" },
+        { method: "CLASSROOM", level: "Level II" },
       ],
     });
-    expect(result.ndtMethod).toBe("DRILLING");
+    expect(result.ndtMethod).toBe("ON_THE_JOB");
     expect(result.certificationLevel).toBe("Level III");
   });
 
   it("clears legacy fields when qualifications is an empty array", () => {
     const result = canonicalizeSupervisorWrite({
-      ndtMethod: "DRILLING",
+      ndtMethod: "ON_THE_JOB",
       certificationLevel: "Level III",
       qualifications: [],
     });
@@ -29,10 +29,10 @@ describe("canonicalizeSupervisorWrite", () => {
 
   it("leaves legacy fields untouched on partial writes without qualifications", () => {
     const result = canonicalizeSupervisorWrite({
-      ndtMethod: "DRILLING",
+      ndtMethod: "ON_THE_JOB",
       certificationLevel: "Level III",
     });
-    expect(result.ndtMethod).toBe("DRILLING");
+    expect(result.ndtMethod).toBe("ON_THE_JOB");
     expect(result.certificationLevel).toBe("Level III");
   });
 });
@@ -52,7 +52,7 @@ describe("supervisorQualificationSchema", () => {
 
   it("rejects an unknown level", () => {
     expect(() =>
-      supervisorQualificationSchema.parse({ method: "DRILLING", level: "Level IV" }),
+      supervisorQualificationSchema.parse({ method: "ON_THE_JOB", level: "Level IV" }),
     ).toThrow();
   });
 });

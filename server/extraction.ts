@@ -36,11 +36,10 @@ Schema:
   ]
 }
 
-Methods: DRILLING (drilling hours — rock/soil drilling, anchor or nail holes),
-SHOTCRETE (shotcrete / nozzle hours), SCALING (scaling — removing loose rock
-from slopes, hand or bar scaling). Map any equivalents to one of the listed
-codes. If a row has hours split across multiple methods, return ONE row per
-method. Skip rope-access hours (they are logged separately) and rows without a
+Methods: ON_THE_JOB (hours worked on a jobsite for an employer — a timecard,
+pay stub or daily log), CLASSROOM (training school / class hours — OSHA,
+confined space, apprenticeship classes). Map any equivalents to one of the
+listed codes. If a day has both, return ONE row per method. Skip rows without a
 clear method or hours value. If you cannot read the document, return {"rows": []}.`;
 
 const ROPE_INSTRUCTIONS = `You are extracting Rope Access training hours from a

@@ -181,9 +181,9 @@ describe("Bearer-token auth on user data endpoints", () => {
     const app2 = await makeApp();
 
     storageMock.getEntries.mockResolvedValueOnce([
-      { id: 1, userId: 1, method: "DRILLING", hours: 4, verified: true } as never,
-      { id: 2, userId: 1, method: "DRILLING", hours: 2, verified: false } as never,
-      { id: 3, userId: 1, method: "SHOTCRETE", hours: 1.5, verified: true } as never,
+      { id: 1, userId: 1, method: "ON_THE_JOB", hours: 4, verified: true } as never,
+      { id: 2, userId: 1, method: "ON_THE_JOB", hours: 2, verified: false } as never,
+      { id: 3, userId: 1, method: "CLASSROOM", hours: 1.5, verified: true } as never,
     ]);
 
     const res = await request(app2)
@@ -193,8 +193,8 @@ describe("Bearer-token auth on user data endpoints", () => {
     expect(res.status).toBe(200);
     expect(res.body.totals).toEqual(
       expect.arrayContaining([
-        expect.objectContaining({ method: "DRILLING", totalHours: 6, verifiedHours: 4, count: 2 }),
-        expect.objectContaining({ method: "SHOTCRETE", totalHours: 1.5, verifiedHours: 1.5, count: 1 }),
+        expect.objectContaining({ method: "ON_THE_JOB", totalHours: 6, verifiedHours: 4, count: 2 }),
+        expect.objectContaining({ method: "CLASSROOM", totalHours: 1.5, verifiedHours: 1.5, count: 1 }),
       ]),
     );
   });

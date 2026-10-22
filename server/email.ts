@@ -16,8 +16,8 @@ if (!process.env.RESEND_API_KEY) {
 const DEFAULT_FROM_EMAIL = 'noreply@n8ai.io';
 const fromHeader = () => {
   const from = process.env.EMAIL_FROM?.trim();
-  if (!from) return `Access Limited Logbook <${DEFAULT_FROM_EMAIL}>`;
-  return from.includes('<') ? from : `Access Limited Logbook <${from}>`;
+  if (!from) return `Laborers Logbook <${DEFAULT_FROM_EMAIL}>`;
+  return from.includes('<') ? from : `Laborers Logbook <${from}>`;
 };
 
 // Fallback production domain when APP_BASE_URL isn't set.
@@ -250,7 +250,7 @@ export async function sendInviteEmail(
   const loginUrl = `${getBaseUrl()}/auth`;
   const html = `
     <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto;">
-      <h2>You've been invited to Access Limited Logbook</h2>
+      <h2>You've been invited to Laborers Logbook</h2>
       <p>${name ? `Hi ${name},` : "Hi,"}</p>
       <p>An account has been created for you. Sign in with the credentials below:</p>
 
@@ -269,7 +269,7 @@ export async function sendInviteEmail(
       </p>
     </div>
   `;
-  return await sendEmail(to, "Your Access Limited Logbook account", html);
+  return await sendEmail(to, "Your Laborers Logbook account", html);
 }
 
 export async function sendVerificationConfirmation(

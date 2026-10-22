@@ -59,7 +59,7 @@ export default function AuthPage() {
         <div className="absolute inset-0 bg-black opacity-20"></div>
         <div className="z-10 text-center p-8">
           <h2 className="text-3xl font-bold text-white mb-4">
-            Access Limited Logbook
+            Laborers Logbook
           </h2>
           <p className="text-white text-lg mb-6">
             Log rope, drilling, and shotcrete hours from the field, get supervisor verification, and export verified logbooks.

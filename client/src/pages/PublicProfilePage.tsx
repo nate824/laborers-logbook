@@ -219,7 +219,7 @@ export default function PublicProfilePage() {
         )}
 
         <p className="text-center text-xs text-neutral-400 pt-4">
-          Shared via Access Limited Logbook
+          Shared via Laborers Logbook
         </p>
       </main>
     </div>

@@ -86,7 +86,7 @@ export function InstallPrompt() {
         </div>
         <div className="flex-1 pr-4">
           <h3 className="text-sm font-semibold text-neutral-900">
-            Install ACL Logbook
+            Install Laborers Logbook
           </h3>
           {showIOS ? (
             <p className="mt-1 text-xs text-neutral-600">
@@ -96,7 +96,7 @@ export function InstallPrompt() {
             </p>
           ) : (
             <p className="mt-1 text-xs text-neutral-600">
-              Add ACL Logbook to your home screen to log hours offline on the job
+              Add Laborers Logbook to your home screen to log hours offline on the job
               site.
             </p>
           )}
