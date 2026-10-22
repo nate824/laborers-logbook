@@ -4,19 +4,23 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## What this is
 
-Access Limited Logbook: a company-specific spin-off of the OJT Hours Tracker (reference repo: `/home/n8/projects/OJTLogTracker`) for Access Limited (GeoStabilization). Technicians log hours, get them verified by supervisors over email, and export rope-access logbook PDFs. Built to run on Replit.
+Laborers Logbook: a union spin-off of the Access Limited Field Hours Logbook (sibling repo `../../-TrackerLoger-ACL-`, itself a spin-off of `/home/n8/projects/OJTLogTracker`), built for LiUNA Laborers (pitched to Local 220, Bakersfield). It is the **member's own record**, never the official one: hours signed off by a foreman, a health-plan coverage/hour-bank estimate checked against the trust fund, apprenticeship progress, the out-of-work list, and a cert wallet. Background research and sources: `../RESEARCH.md`. UI must say "unofficial" and never use LiUNA branding.
 
-Two logs, two tabs:
-- **Rope Hours** (`/rope-hours`, `RopeHoursPage`) — like rope hours in the reference app (date range, skills, SPRAT/IRATA export), plus two ACL fields from the paper logbook's "Work Log - Rope Hours" page: `projectNumber` and `workCode`. Otherwise keep it in sync with the reference; don't add more ACL-specific fields without being asked.
-- **Field Hours** (`/field-hours`, `ProfilePage`, the default landing tab and first in the nav) — one row per day, OJT-style, with one column per `FieldMethods` key (`DRILLING`, `SHOTCRETE`, `SCALING`). Each entry also carries method-specific logbook fields in `entries.details` (JSON, all optional), defined by `FIELD_METHOD_DETAILS` in `shared/schema.ts` from the real ACL logbook: Drilling Log (Job #, Type, Drill, Hole depth & size, Total LF, Conditions, Angle) and Nozzleman Log for shotcrete (Job #, Employer, Dry/Wet, Sq ft, Vert./Horz., End date, Thickness). Scaling has no logbook page yet (just Job #).
+Tabs (`ProfileHeader` navItems; bottom bar on phones): **Status** (`/status`, landing after login), **Work Hours** (`/hours`, `ProfilePage`; `/field-hours` kept as an alias), **Benefits** (`/benefits`), **Certs** (`/certs`), **Signers**. `/list` (out-of-work list history) is reached from the Status card. Rope Hours still exists at `/rope-hours` but is out of the nav.
 
-Deliberately removed vs. the reference: organizations, all NDT methods/levels, and the NDT vendor PDF forms (Mistras/Lê NDT, Curtiss-Wright).
+**Work Hours** reuse the ACL `entries` table with two `FieldMethods`: `ON_THE_JOB` (details: employer, union "Union"/"Non-union", job #, county, work process, overtime, double time) and `CLASSROOM` (course, school). Work-process names are placeholders until we have the JAC's list. New rows default to on-the-job with the last employer/site (`laborers-last-job` in localStorage, `NewEntryForm`).
 
-Hidden from the UI (backend and components still exist, just not rendered on `ProfilePage`): Certifications, Share profile, and Claude/MCP API tokens cards.
+**Union rules live in `shared/union.ts`** (pure, tested in `tests/union-rules.test.ts`): `UNION_RULES` holds every number (300 hrs / 3 months to qualify, 1-month reporting lag so month M pays for M+2, 100/month deduction, 400 cap, non-union work zeroes the bank, 30-day re-register, CCL apprentice periods 4,000 OJT + 304 RSI, $49 dues). Several are UNVERIFIED as current (2013 SPD); change the constant, not the call sites. Functions: `healthStatus`, `apprenticeStatus`, `listStatus`, `fundCrossCheck`, `reminders`. The client computes everything on the device in `client/src/lib/union.ts` (`useUnionData`).
 
-**Shared signer list** (replaces organizations — one company): every user sees and can request verification from every signer (`storage.getSupervisors()` takes no user). Only the user who added a signer, or an admin, can edit/delete it, and emails are unique case-insensitively. That policy lives in `server/signers.ts` and is used by both `routes.ts` and the MCP tools — change it there, not inline.
+**Union tables** (`shared/schema.ts`, migrations in `runMigrations`): `users.union_profile` JSON (`UnionProfile`: classification, local #, prior OJT/RSI hours, starting bank, dues paid through), `fund_reports` (hours the fund shows per month/employer, typed in by the member), `dispatch_events` (REGISTERED / RE_REGISTERED / DISPATCHED / LAID_OFF / REFUSED). Routes in `server/unionRoutes.ts` (`/api/union/profile|fund-reports|dispatch`), all scoped to the session user; deletes take the owner id.
 
-Brand palette (from geostabilization.com/accesslimited): orange `#f16521` = `--primary` (`20 88% 54%` in `client/src/index.css`), navy `#024985` (PWA icon). Use `primary` tokens, not hard-coded Tailwind blues.
+**Month keys** are `"YYYY-MM"`. Stored calendar dates are UTC midnight, so use `monthKey()`/`calendarDay()` (UTC) for them and `localMonthKey()` only for a real local "today"; tests pass in LA, UTC and Tokyo (`TZ=... npx vitest run tests/union-rules.test.ts`).
+
+Inherited from ACL and unchanged: verification links (single/batch), crypto integrity, import (prompt now asks for ON_THE_JOB/CLASSROOM), PDF export (`fieldHoursSpec`: **Work Hours Log** and **Class / Training Log**), offline outbox, MCP server (no union tools yet), admin.
+
+**Shared signer list**: every user sees every signer (`storage.getSupervisors()` takes no user). Only the user who added a signer, or an admin, can edit/delete it. Policy lives in `server/signers.ts`.
+
+Brand: orange `--primary` inherited from ACL; header badge "LBR". Progress bars use a `bg-muted` track (the theme's `--secondary` is green).
 
 ## Commands
 
@@ -27,8 +31,8 @@ npm run start      # run production build (dist/index.js)
 npm run check      # tsc type-check (noEmit)
 npm run db:push    # drizzle-kit push — sync shared/schema.ts to the database
 
-npm run dev:local  # local run without Neon: Docker Postgres (acl-pg, volume acl-pg-data) + scripts/local/wsproxy.mjs
-npm run seed:local # seed demo users/entries/signers into the running local app (accounts listed in scripts/local/seed.sh)
+npm run dev:local  # local run on http://localhost:5050: Docker Postgres laborers-pg (port 5434, volume laborers-pg-data) + wsproxy 5489. Separate from the ACL app (acl-pg/5433/5000) so both run at once.
+npm run seed:local # seed demo member + apprentice with hours, fund reports, list history, certs (accounts in scripts/local/seed.sh)
 
 npx vitest run                              # run all tests
 npx vitest run tests/forms/sprat_log_v1.test.ts   # single test file
@@ -45,7 +49,7 @@ Three TypeScript roots, unified by path aliases (`@/` → `client/src`, `@shared
 - **`server/`** — Express. `index.ts` boots everything; `routes.ts` (~1800 lines) registers all `/api/*` routes and the session/auth middleware.
 - **`shared/schema.ts`** — single source of truth: Drizzle table definitions, `drizzle-zod` insert schemas, exported row/insert types, and the `FieldMethods` enum (+ `fieldMethodLabel`). Both client and server import from here.
 
-**Single port.** Everything serves on port 5000. In dev, Vite runs as Express middleware (`server/vite.ts`); in prod, Express serves the static build. The catch-all Vite/static route is registered last so it doesn't shadow API routes.
+**Single port.** Everything serves on `PORT` (default 5000; dev:local uses 5050). In dev, Vite runs as Express middleware (`server/vite.ts`); in prod, Express serves the static build. The catch-all Vite/static route is registered last so it doesn't shadow API routes.
 
 **Database.** Neon serverless Postgres over WebSockets (`server/db.ts`) + Drizzle ORM. Note there are **two** ways schema reaches the DB and you usually need both: `npm run db:push` for local dev, AND an idempotent `runMigrations()` (`ALTER TABLE ... ADD COLUMN IF NOT EXISTS`) that runs on every server boot in `server/index.ts`. There is no runtime migrations folder — when you add a column to `shared/schema.ts`, also add it to `runMigrations()` so production picks it up.
 
@@ -54,7 +58,7 @@ Three TypeScript roots, unified by path aliases (`@/` → `client/src`, `@shared
 ## Domain model & core flows
 
 Two parallel record types, each owned by a user and following the same lifecycle:
-- **`entries`** — Field Hours (date, location, `method`, hours). `method` must be a `FieldMethods` key (enforced by `insertEntrySchema`). Internal names still say "OJT" (`OJTTable`, `ImportLogDialog type="ojt"`, `extractOJTRows`, `ShareSettings.ojtMethods`) — that's legacy naming, the UI says "Field Hours".
+- **`entries`** — Work Hours (date, location, `method`, hours). `method` must be a `FieldMethods` key (enforced by `insertEntrySchema`). Internal names still say "OJT" (`OJTTable`, `ImportLogDialog type="ojt"`, `extractOJTRows`, `ShareSettings.ojtMethods`) — that's legacy naming, the UI says "Field Hours".
 - **`ropeHours`** — rope-access work (start/end date, location, skills, hours).
 
 **Adding/changing a field method**: edit `FieldMethods` + `FIELD_METHOD_LABELS` + `FIELD_METHOD_DETAILS` in `shared/schema.ts`. The entry/edit forms render detail inputs from `FIELD_METHOD_DETAILS` (`FieldDetailInputs`); `cleanEntryDetails` drops keys that don't belong to the method (client on save, server on create/patch, MCP tools). Give the method an export layout in `fieldHoursSpec` (`client/src/lib/exportSheets.ts`) if it has a logbook page. The table columns, totals, entry/edit/import pickers, export sheets (one PDF per method), MCP tools, commit validation and signer qualifications (`SIGNER_METHODS` = field methods + `ROPE_ACCESS`) all derive from it. Also update the AI import prompt (`OJT_INSTRUCTIONS` in `server/extraction.ts`) and the method table on `SkillzPage`.
@@ -68,7 +72,7 @@ Both tables carry the same three feature dimensions:
 
 The **Export** button (Field and Rope pages, plus the header / account menu) opens `ExportHoursDialog`: **Download PDF** or **Share hours** (Web Share with the PDF files; needs https or localhost, so the button is hidden over plain-http tailnet). PDFs are built on the device with jsPDF, so export works offline. Only verified records go in (imported ones count, with "Signed paper log" in the signature cell).
 Sheets copy the ACL paper logbook's look (black title bar, its column headers; a logbook spread = one landscape table).
-- Field Hours: **one PDF per method**, columns as printed in the logbook: **Drilling Log** (Type, Drill, Hole Depth & Size / Total LF, Drilling Conditions & Angle, Supervisor Signature, Date, Job #; totals LF) and **Nozzleman Log** (Job #, Employer, Dry Wet, Hours, SQ FT, Vert. Horz., Start/End Date, Thickness, Supervisor Signature; "circle one" columns are drawn with the logged choice circled). Scaling uses a simple Date / Job # / Location / Hours / Signature sheet.
+- Work Hours: **one PDF per kind**: **Work Hours Log** (Date, Employer, Union / Non-union, Job # / County, Work Process, Hours, OT / DT, Foreman Signature; totals Hours and OT) and **Class / Training Log** (Date, Course, School / Site, Hours, Instructor Signature). Unknown kinds fall back to a simple Date / Job # / Location / Hours / Signature sheet.
 - Rope Hours: **ACL Work Log - Rope Hours** (default; Date(s), Project Number, Work Code, Work Details, Supervisor Signature & Log Line, Hours Worked, plus "Total Work Hours Since Previous Certification" from the latest SPRAT/IRATA cert's issue date, blank if none), and our own **SPRAT-style** / **IRATA-style** sheets.
 - `buildLogSheet` sizes rows to their wrapped text and ends the table at the last entry: **never pad with blank rows**. Each page has a Page Total / Running Total footer per `spec.totals`.
 
@@ -99,9 +103,9 @@ Auth gotchas caused by the persisted cache: (1) never full-page-reload after log
 
 ### Mobile-first UI
 
-Most use is on a phone in the field. Under 768px (`useIsMobile`) the app swaps layouts rather than squeezing the desktop one: `ProfileHeader` becomes a compact top bar (account menu holds export/admin/theme/logout) plus a fixed bottom tab bar; Field Hours renders `FieldHoursSummary` + `MobileFieldLog`/`EntryCard` instead of `OJTTable`; Rope Hours and Signers render card lists. Rules: no horizontal scrolling, primary action is a full-width button, secondary actions go in a ⋮ menu, tap targets ≥ 40px, page content uses `pb-mobile-nav` so the tab bar doesn't cover it. `EntryRow` and `EntryCard` share behavior through `useEntryActions` — change it there. Dialogs are capped to the viewport globally in `ui/dialog.tsx` / `ui/alert-dialog.tsx`.
+Most use is on a phone in the field. Under 768px (`useIsMobile`) the app swaps layouts rather than squeezing the desktop one: `ProfileHeader` becomes a compact top bar (account menu holds export/admin/theme/logout) plus a fixed bottom tab bar; Work Hours renders `FieldHoursSummary` + `MobileFieldLog`/`EntryCard` instead of `OJTTable`; Rope Hours and Signers render card lists. Rules: no horizontal scrolling, primary action is a full-width button, secondary actions go in a ⋮ menu, tap targets ≥ 40px, page content uses `pb-mobile-nav` so the tab bar doesn't cover it. `EntryRow` and `EntryCard` share behavior through `useEntryActions` — change it there. Dialogs are capped to the viewport globally in `ui/dialog.tsx` / `ui/alert-dialog.tsx`.
 
-To preview at phone size locally, serve a throwaway HTML page from `client/public/` that iframes `/field-hours` at 390×844 (same origin, so the session cookie works), and delete it afterwards.
+To preview at phone size locally, serve a throwaway HTML page from `client/public/` that iframes `/status`, `/hours`, `/benefits` at 390×844 (same origin, so the session cookie works), and delete it afterwards.
 
 ### Dates
 
