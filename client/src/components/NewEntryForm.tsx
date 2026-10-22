@@ -33,7 +33,7 @@ const formSchema = z.object({
     z.object({
       date: z.string().min(1, "Date is required"),
       location: z.string().min(1, "Location is required"),
-      method: z.string().min(1, "Method is required"),
+      method: z.string().min(1, "Pick on the job or class"),
       hours: z.number().min(0.1, "Hours must be greater than 0"),
       details: z.record(z.string(), z.string()),
     }),
@@ -42,13 +42,39 @@ const formSchema = z.object({
 
 type FormValues = z.infer<typeof formSchema>;
 
-const emptyRow = () => ({
-  date: todayLocalISODate(),
-  location: "",
-  method: "",
-  hours: 0,
-  details: {} as Record<string, string>,
-});
+// Most days are another shift for the same contractor, so a new row starts
+// as on-the-job work with the last employer and site already filled in.
+const LAST_JOB_KEY = "laborers-last-job";
+
+function lastJob(): { location: string; details: Record<string, string> } {
+  try {
+    const saved = JSON.parse(localStorage.getItem(LAST_JOB_KEY) ?? "null");
+    if (saved && typeof saved === "object") return { location: saved.location ?? "", details: saved.details ?? {} };
+  } catch {
+    /* private mode or bad JSON: start blank */
+  }
+  return { location: "", details: {} };
+}
+
+function rememberJob(location: string, details: Record<string, string>) {
+  try {
+    const { employer, union, county } = details;
+    localStorage.setItem(LAST_JOB_KEY, JSON.stringify({ location, details: { employer, union, county } }));
+  } catch {
+    /* ignore */
+  }
+}
+
+const emptyRow = () => {
+  const last = lastJob();
+  return {
+    date: todayLocalISODate(),
+    location: last.location,
+    method: "ON_THE_JOB",
+    hours: 0,
+    details: { union: "Union", ...last.details } as Record<string, string>,
+  };
+};
 
 export function NewEntryForm({
   mobile = false,
@@ -87,6 +113,7 @@ export function NewEntryForm({
         details: cleanEntryDetails(e.method, e.details),
       };
       createMutation.mutate({ tempId: nextTempId(), draft });
+      if (e.method === "ON_THE_JOB") rememberJob(e.location, draft.details ?? {});
     });
 
     // Reset form + toast immediately — the optimistic cache update has
@@ -96,7 +123,7 @@ export function NewEntryForm({
     toast({
       title: online ? "Entries added" : "Saved offline",
       description: online
-        ? "Your field hours have been saved."
+        ? "Your hours have been saved."
         : "We'll sync these entries when you reconnect.",
     });
     onDone?.();
@@ -145,7 +172,7 @@ export function NewEntryForm({
             name="entries.0.method"
             render={({ field }) => (
               <FormItem>
-                <FormLabel className="text-base">Method</FormLabel>
+                <FormLabel className="text-base">Type</FormLabel>
                 {/* Big tap targets instead of a dropdown — one tap on a phone. */}
                 <div className="grid grid-cols-3 gap-2" role="radiogroup">
                   {methodOptions.map((option) => {
@@ -237,7 +264,7 @@ export function NewEntryForm({
   return (
     <div className="bg-white rounded-lg shadow-sm p-6 mb-8">
       <h2 className="text-lg font-semibold text-neutral-900 mb-4">
-        Log Field Hours
+        Log Work Hours
       </h2>
 
       <Form {...form}>
@@ -253,7 +280,7 @@ export function NewEntryForm({
                     Job Location
                   </th>
                   <th className="px-4 py-3 text-left text-xs font-medium text-neutral-500 uppercase tracking-wider">
-                    Method
+                    Type
                   </th>
                   <th className="px-4 py-3 text-left text-xs font-medium text-neutral-500 uppercase tracking-wider">
                     Hours

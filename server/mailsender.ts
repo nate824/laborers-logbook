@@ -106,8 +106,8 @@ export async function sendVerificationEmail(
 
   const html = `
     <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto;">
-      <h2>Field Hours Verification Request</h2>
-      <p>${userName} ${employeeNumber ? `(Employee #: ${employeeNumber})` : ""} has requested your verification for the following field hours:</p>
+      <h2>Work Hours Verification Request</h2>
+      <p>${userName} ${employeeNumber ? `(Employee #: ${employeeNumber})` : ""} has requested your verification for the following work hours:</p>
 
       <div style="background-color: #f4f4f4; padding: 15px; border-radius: 4px; margin: 20px 0;">
         <p><strong>Date:</strong> ${formatCalendarDate(entryDetails.date)}</p>
@@ -132,7 +132,7 @@ export async function sendVerificationEmail(
 
   return await sendEmail(
     to,
-    `Verification Request for Field Hours from ${userName}`,
+    `Verification Request for Work Hours from ${userName}`,
     html,
   );
 }

@@ -65,7 +65,7 @@ export function DeleteEntryButton({
           <AlertDialogTitle>Delete this entry?</AlertDialogTitle>
           <AlertDialogDescription>
             {warnVerified ? "This entry has already been verified. " : ""}
-            This will permanently delete the field-hours entry from{" "}
+            This will permanently delete the work-hours entry from{" "}
             {formatDate(entry.date)} at {entry.location}. This cannot be undone.
           </AlertDialogDescription>
         </AlertDialogHeader>
@@ -123,7 +123,7 @@ export function useEntryActions(
         entry.id < 0
           ? "The unsynced entry was discarded."
           : online
-          ? "The field-hours entry has been deleted."
+          ? "The work-hours entry has been deleted."
           : "We'll sync this deletion when you reconnect.",
     });
   };
@@ -355,7 +355,7 @@ export function EntryRow({
                     Remove this imported entry?
                   </AlertDialogTitle>
                   <AlertDialogDescription>
-                    This will delete the imported field-hours entry from{" "}
+                    This will delete the imported work-hours entry from{" "}
                     {formatDate(entry.date)} at {entry.location}. If no other
                     entries reference the uploaded log, the original file will
                     also be removed from storage. This cannot be undone.

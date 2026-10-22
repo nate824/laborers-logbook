@@ -30,7 +30,7 @@ export default function AuthPage() {
       if ((user as any).isAdmin) {
         setLocation("/admin");
       } else {
-        setLocation("/field-hours");
+        setLocation("/status");
       }
     }
   }, [user, isLoading, setLocation]);
@@ -62,26 +62,27 @@ export default function AuthPage() {
             Laborers Logbook
           </h2>
           <p className="text-white text-lg mb-6">
-            Log rope, drilling, and shotcrete hours from the field, get supervisor verification, and export verified logbooks.
+            Your own record as a union laborer: hours signed off by your foreman, health coverage, the out-of-work list and your certs.
           </p>
           <ul className="text-white text-left space-y-3 max-w-md mx-auto">
             <li className="flex items-center">
               <span className="mr-2 bg-white/20 p-1 rounded-full">✓</span>
-              Rope hours plus a daily drilling &amp; shotcrete log
+              Daily work and class hours, by employer
             </li>
             <li className="flex items-center">
               <span className="mr-2 bg-white/20 p-1 rounded-full">✓</span>
-              Request verification from supervisors
+              Foreman sign-off by text or email
             </li>
             <li className="flex items-center">
               <span className="mr-2 bg-white/20 p-1 rounded-full">✓</span>
-              Export verified logs as PDF documents
+              Health coverage and hour bank estimate, checked against the fund
             </li>
             <li className="flex items-center">
               <span className="mr-2 bg-white/20 p-1 rounded-full">✓</span>
-              Monitor progress toward certification requirements
+              Re-register reminders, apprenticeship progress, cert expiry
             </li>
           </ul>
+          <p className="mt-6 text-sm text-white/80">Unofficial. Not affiliated with LiUNA or any local.</p>
         </div>
       </div>
     </div>

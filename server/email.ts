@@ -69,7 +69,7 @@ export async function sendEmail(to: string, subject: string, html: string): Prom
   }
 }
 
-// Send verification request email for field-hours entries
+// Send verification request email for work-hours entries
 export async function sendVerificationRequest(
   supervisor: Supervisor,
   user: User,
@@ -87,8 +87,8 @@ export async function sendVerificationRequest(
 
   const html = `
     <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto;">
-      <h2>Field Hours Verification Request</h2>
-      <p>${user.name || user.email} ${user.employeeNumber ? `(Employee #: ${user.employeeNumber})` : ''} has requested your verification for the following field hours:</p>
+      <h2>Work Hours Verification Request</h2>
+      <p>${user.name || user.email} ${user.employeeNumber ? `(Employee #: ${user.employeeNumber})` : ''} has requested your verification for the following work hours:</p>
       
       <div style="background-color: #f4f4f4; padding: 15px; border-radius: 4px; margin: 20px 0;">
         <p><strong>Date:</strong> ${formatCalendarDate(entry.date)}</p>
@@ -113,7 +113,7 @@ export async function sendVerificationRequest(
 
   return await sendEmail(
     supervisor.email,
-    `Verification Request for Field Hours from ${user.name || user.email}`,
+    `Verification Request for Work Hours from ${user.name || user.email}`,
     html
   );
 }
@@ -169,7 +169,7 @@ export async function sendRopeHoursVerificationRequest(
   );
 }
 
-// Send a single batch verification request email covering multiple field-hours entries
+// Send a single batch verification request email covering multiple work-hours entries
 export async function sendBatchVerificationRequest(
   supervisor: Supervisor,
   user: User,
@@ -198,8 +198,8 @@ export async function sendBatchVerificationRequest(
 
   const html = `
     <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto;">
-      <h2>Field Hours Verification Request</h2>
-      <p>${user.name || user.email} ${user.employeeNumber ? `(Employee #: ${user.employeeNumber})` : ''} has requested your verification for the following ${batchEntries.length} field-hours entries:</p>
+      <h2>Work Hours Verification Request</h2>
+      <p>${user.name || user.email} ${user.employeeNumber ? `(Employee #: ${user.employeeNumber})` : ''} has requested your verification for the following ${batchEntries.length} work-hours entries:</p>
       
       <table style="width:100%;border-collapse:collapse;margin:20px 0;background:#f4f4f4;border-radius:4px;">
         <thead>
@@ -235,12 +235,12 @@ export async function sendBatchVerificationRequest(
 
   return await sendEmail(
     supervisor.email,
-    `Batch Verification Request for Field Hours from ${user.name || user.email}`,
+    `Batch Verification Request for Work Hours from ${user.name || user.email}`,
     html
   );
 }
 
-// Send verification confirmation email to user (field-hours entries)
+// Send verification confirmation email to user (work-hours entries)
 // Invite a newly-created user: send their login email + a temporary password.
 export async function sendInviteEmail(
   to: string,
@@ -281,8 +281,8 @@ export async function sendVerificationConfirmation(
 
   const html = `
     <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto;">
-      <h2>Field Hours Verified</h2>
-      <p>Good news! Your field hours have been verified by ${supervisorName}:</p>
+      <h2>Work Hours Verified</h2>
+      <p>Good news! Your work hours have been verified by ${supervisorName}:</p>
       
       <div style="background-color: #f4f4f4; padding: 15px; border-radius: 4px; margin: 20px 0;">
         <p><strong>Date:</strong> ${formatCalendarDate(entry.date)}</p>
@@ -292,13 +292,13 @@ export async function sendVerificationConfirmation(
         <p><strong>Verified By:</strong> ${supervisorName}</p>
       </div>
       
-      <p>These hours have been added to your verified field hours log. You can view and export your log from your profile page.</p>
+      <p>These hours have been added to your verified work hours log. You can view and export your log from your profile page.</p>
     </div>
   `;
 
   return await sendEmail(
     user.email,
-    'Field Hours Verified',
+    'Work Hours Verified',
     html
   );
 }

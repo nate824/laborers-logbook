@@ -21,7 +21,7 @@ export default function AdminPage() {
   // Redirect non-admins away.
   useEffect(() => {
     if (!authLoading && user && !user.isAdmin) {
-      setLocation("/field-hours");
+      setLocation("/status");
     }
   }, [user, authLoading, setLocation]);
 

@@ -356,7 +356,7 @@ export function ImportLogDialog({ open, onClose, type }: ImportLogDialogProps) {
       toast({
         title: "Imported",
         description: `${createdCount} ${
-          type === "ojt" ? "field hours entries" : "rope hour entries"
+          type === "ojt" ? "work hours entries" : "rope hour entries"
         } imported from your signed log.`,
       });
       queryClient.invalidateQueries({

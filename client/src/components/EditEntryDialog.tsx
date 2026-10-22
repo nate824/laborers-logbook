@@ -37,7 +37,7 @@ import { FieldDetailInputs } from "@/components/FieldDetailInputs";
 const formSchema = z.object({
   date: z.string().min(1, "Date is required"),
   location: z.string().min(1, "Location is required"),
-  method: z.string().min(1, "Method is required"),
+  method: z.string().min(1, "Pick on the job or class"),
   hours: z.number().min(0.1, "Hours must be greater than 0"),
   details: z.record(z.string(), z.string()),
 });
@@ -125,7 +125,7 @@ export function EditEntryDialog({
     >
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
-          <DialogTitle>Edit Field Hours Entry</DialogTitle>
+          <DialogTitle>Edit Work Hours Entry</DialogTitle>
           <DialogDescription>
             Make changes to this entry. Once it's been verified, it can no
             longer be edited.
@@ -168,7 +168,7 @@ export function EditEntryDialog({
               name="method"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Method</FormLabel>
+                  <FormLabel>Type</FormLabel>
                   <Select value={field.value} onValueChange={field.onChange}>
                     <FormControl>
                       <SelectTrigger>

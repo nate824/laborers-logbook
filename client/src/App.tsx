@@ -23,6 +23,10 @@ import ResetPasswordPage from "@/pages/ResetPasswordPage";
 import NewPasswordPage from "@/pages/NewPasswordPage";
 import AdminPage from "@/pages/AdminPage";
 import SkillzPage from "@/pages/SkillzPage";
+import StatusPage from "@/pages/StatusPage";
+import BenefitsPage from "@/pages/BenefitsPage";
+import ListPage from "@/pages/ListPage";
+import CertsPage from "@/pages/CertsPage";
 import { ProtectedRoute } from "@/lib/protected-route";
 
 const persister = createIDBPersister();
@@ -32,9 +36,35 @@ function Router() {
     <Switch>
       <Route path="/" component={AuthPage} />
       <Route path="/auth" component={AuthPage} />
+      <Route path="/status">
+        <ProtectedRoute>
+          <StatusPage />
+        </ProtectedRoute>
+      </Route>
+      <Route path="/hours">
+        <ProtectedRoute>
+          <ProfilePage />
+        </ProtectedRoute>
+      </Route>
+      {/* Old ACL path, kept so installed-app shortcuts and old links still work. */}
       <Route path="/field-hours">
         <ProtectedRoute>
           <ProfilePage />
+        </ProtectedRoute>
+      </Route>
+      <Route path="/benefits">
+        <ProtectedRoute>
+          <BenefitsPage />
+        </ProtectedRoute>
+      </Route>
+      <Route path="/list">
+        <ProtectedRoute>
+          <ListPage />
+        </ProtectedRoute>
+      </Route>
+      <Route path="/certs">
+        <ProtectedRoute>
+          <CertsPage />
         </ProtectedRoute>
       </Route>
       <Route path="/rope-hours">
@@ -71,7 +101,7 @@ function App() {
       persistOptions={{
         persister,
         maxAge: 1000 * 60 * 60 * 24 * 7, // 7 days
-        buster: "acl-v1",
+        buster: "laborers-v1",
         dehydrateOptions: {
           shouldDehydrateMutation: () => true,
         },

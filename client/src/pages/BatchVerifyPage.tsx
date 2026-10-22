@@ -93,9 +93,9 @@ export default function BatchVerifyPage() {
     <div className="min-h-screen flex flex-col items-center justify-center px-4 py-8 bg-neutral-50">
       <div className="w-full max-w-lg bg-white p-8 rounded-lg shadow-md">
         <div className="mb-8 text-center">
-          <h1 className="text-2xl font-semibold mb-2">Batch Field Hours Verification</h1>
+          <h1 className="text-2xl font-semibold mb-2">Batch Work Hours Verification</h1>
           <p className="text-neutral-500">
-            Please review and verify the following field-hours entries for{" "}
+            Please review and verify the following work-hours entries for{" "}
             <span className="font-medium text-neutral-800">{user.name || user.email}</span>
             {user.employeeNumber && ` (Employee #: ${user.employeeNumber})`}.
           </p>
@@ -142,7 +142,7 @@ export default function BatchVerifyPage() {
               name="verifierName"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Your Name (Supervisor)</FormLabel>
+                  <FormLabel>Your name (foreman / supervisor)</FormLabel>
                   <FormControl>
                     <Input placeholder="Enter your full name" {...field} />
                   </FormControl>

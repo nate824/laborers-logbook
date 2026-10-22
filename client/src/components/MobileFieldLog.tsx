@@ -47,7 +47,7 @@ export function FieldHoursSummary({ entries }: { entries: Entry[] }) {
       <div className="flex items-end justify-between gap-4">
         <div>
           <div className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
-            Total field hours
+            Total hours
           </div>
           <div className="text-4xl font-bold tabular-nums text-foreground">
             {total.toFixed(1)}
@@ -133,7 +133,7 @@ export function MobileFieldLog({
       {entries.length === 0 ? (
         <div className="rounded-xl border-2 border-dashed border-border p-8 text-center text-muted-foreground">
           <ClipboardList className="mx-auto mb-2 h-8 w-8 opacity-50" />
-          No field hours yet. Tap <span className="font-medium">Log Field Hours</span> to add your first day.
+          No hours yet. Tap <span className="font-medium">Log hours</span> to add your first day.
         </div>
       ) : (
         <div className="space-y-3">

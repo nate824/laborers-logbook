@@ -110,9 +110,9 @@ export default function ProfilePage() {
           <div className="flex gap-2">
             <div className="min-w-0 flex-1">
               <MobileLogDrawer
-                buttonLabel="Log Field Hours"
-                title="Log Field Hours"
-                description="Record a day in the field — date, location, method and hours."
+                buttonLabel="Log hours"
+                title="Log hours"
+                description="A day on the job or in class: date, site, employer and hours."
                 icon={<ClipboardList className="h-5 w-5" />}
               >
                 {(close) => <NewEntryForm mobile onDone={close} />}

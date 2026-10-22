@@ -244,7 +244,7 @@ export function EntryCard({
             </AlertDialogTitle>
             <AlertDialogDescription>
               {entry.verified ? "This entry has already been verified. " : ""}
-              This will permanently delete the field-hours entry from{" "}
+              This will permanently delete the work-hours entry from{" "}
               {formatCalendarDate(entry.date)} at {entry.location}. This cannot be undone.
             </AlertDialogDescription>
           </AlertDialogHeader>

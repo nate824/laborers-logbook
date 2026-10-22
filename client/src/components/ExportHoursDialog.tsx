@@ -113,7 +113,7 @@ export function ExportHoursDialog(props: Props) {
     }
   };
 
-  const noun = props.kind === "field" ? "field hours" : "rope hours";
+  const noun = props.kind === "field" ? "work hours" : "rope hours";
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>

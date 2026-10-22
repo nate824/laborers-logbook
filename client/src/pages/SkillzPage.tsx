@@ -54,7 +54,7 @@ hours in the Laborers Logbook, and to send entries to a supervisor for verificat
 
 ## Setup (one time)
 The user must give you a personal API token. If you don't have one, ask for it.
-They create it in the app: Field Hours -> "Claude / MCP access tokens" -> Create token.
+They create it in the app: Work Hours -> "Claude / MCP access tokens" -> Create token.
 Store it and send it on EVERY request as a header:
 
     Authorization: Bearer <TOKEN>
@@ -84,7 +84,7 @@ If the method is ambiguous, ask one quick clarifying question before logging.
 Interpret relative dates in the user's local time, then send ISO YYYY-MM-DD.
 - "today" -> today's date, "yesterday" -> the day before.
 
-## Log a field-hours entry
+## Log a work-hours entry
 POST ${origin}/api/entries
 Body: { "date": "2026-06-06", "location": "Hwy 58 Bakersfield", "method": "ON_THE_JOB", "hours": 10,
         "details": { "employer": "Granite Construction", "union": "Union", "overtime": "2" } }
@@ -110,8 +110,8 @@ Body: {
    Body: { "name": "...", "email": "...", "phone": "...",
            "certificationLevel": "...", "company": "..." }
 3. Send the request:
-   - One field-hours entry:  POST ${origin}/api/verify-request/{entryId}   Body: { "supervisorId": 123 }
-   - Several field-hours entries in one email (needs 2+ entry ids):
+   - One work-hours entry:  POST ${origin}/api/verify-request/{entryId}   Body: { "supervisorId": 123 }
+   - Several work-hours entries in one email (needs 2+ entry ids):
                      POST ${origin}/api/batch-verify-request        Body: { "entryIds": [1,2,3], "supervisorId": 123 }
    - A rope-hours entry:
                      POST ${origin}/api/verify-request-rope/{id}    Body: { "supervisorId": 123 }
@@ -301,7 +301,7 @@ export default function SkillzPage() {
                 Once connected, your assistant can:
               </p>
               <ul className="list-disc list-inside text-muted-foreground space-y-0.5">
-                <li>Log, list, update, and delete field hours and rope-access hours</li>
+                <li>Log, list, update, and delete work hours and rope-access hours</li>
                 <li>See running totals by field method</li>
                 <li>Add supervisors (signers) and request verification emails</li>
                 <li>Generate rope-access logbook PDFs (SPRAT, IRATA)</li>

@@ -1,6 +1,6 @@
 import type { Entry, RopeHours, Supervisor, User } from "@shared/schema";
 
-// Rope-access logbook forms. The "ojt" adapter kind (field-hours entries) is
+// Rope-access logbook forms. The "ojt" adapter kind (work-hours entries) is
 // kept in the registry types for a future Access Limited field-hours form.
 export type FormId =
   | "sprat_log_v1"

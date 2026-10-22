@@ -21,7 +21,7 @@ export interface ExtractedRopeRow {
 
 export type ImportType = "ojt" | "rope";
 
-const OJT_INSTRUCTIONS = `You are extracting daily field hours from a signed Access
+const OJT_INSTRUCTIONS = `You are extracting daily work hours from a signed Access
 Limited (geotechnical construction) field logbook page. Return STRICT JSON only.
 
 Schema:

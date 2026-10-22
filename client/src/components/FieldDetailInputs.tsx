@@ -1,6 +1,6 @@
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { fieldMethodDetails, fieldMethodLabel, type EntryDetails } from "@shared/schema";
+import { fieldMethodDetails, type EntryDetails } from "@shared/schema";
 
 // The method-specific columns from the ACL paper logbook (Drilling Log,
 // Nozzleman Log …), driven by FIELD_METHOD_DETAILS. All optional. Choice
@@ -26,7 +26,7 @@ export function FieldDetailInputs({
   return (
     <fieldset className="space-y-3">
       <legend className={`mb-2 font-medium text-foreground ${large ? "text-base" : "text-sm"}`}>
-        {fieldMethodLabel(method)} log details <span className="font-normal text-muted-foreground">(optional)</span>
+        {method === "CLASSROOM" ? "Class" : "Job"} details <span className="font-normal text-muted-foreground">(optional)</span>
       </legend>
       <div className="grid grid-cols-2 gap-3">
         {specs.map((spec) => {

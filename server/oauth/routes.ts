@@ -217,7 +217,7 @@ export function registerOauthRoutes(app: Express) {
   <div class="client">
     <strong>${htmlEscape(client.clientName)}</strong> is requesting access to your Laborers Logbook account.
   </div>
-  <p class="scopes">It will be able to read and modify your field-hours entries, rope hours, supervisors, and request verifications — the same actions you can perform yourself.</p>
+  <p class="scopes">It will be able to read and modify your work-hours entries, rope hours, supervisors, and request verifications — the same actions you can perform yourself.</p>
   <form method="POST" action="/oauth/authorize/consent">
     ${Object.entries(params)
       .map(

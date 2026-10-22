@@ -316,7 +316,7 @@ export function listStatus(
   let lastSignIn: Date | null = null;
   let employer: string | null = null;
   for (const e of sorted) {
-    const d = new Date(e.date);
+    const d = calendarDay(e.date);
     if (e.kind === "REGISTERED" || e.kind === "RE_REGISTERED") {
       if (state !== "ON_LIST") since = d;
       state = "ON_LIST";
@@ -339,6 +339,13 @@ export function listStatus(
   const due = new Date(lastSignIn);
   due.setDate(due.getDate() + reRegisterDays);
   return { state, since, reRegisterBy: due, daysLeft: daysUntil(due, today), employer };
+}
+
+// A stored calendar date (UTC midnight) as local midnight of the same day, so
+// day counts against a local "today" aren't off by one west of Greenwich.
+export function calendarDay(d: Date | string): Date {
+  const u = new Date(d);
+  return new Date(u.getUTCFullYear(), u.getUTCMonth(), u.getUTCDate());
 }
 
 function startOfDay(d: Date) {
@@ -468,8 +475,8 @@ export function reminders(input: {
 
   for (const c of certs) {
     if (!c.expiryDate) continue;
-    const left = daysUntil(new Date(c.expiryDate), today);
-    if (left < 0) out.push({ id: `cert-${c.id}`, level: "urgent", title: `${c.name} expired`, detail: `Expired ${new Date(c.expiryDate).toLocaleDateString("en-US")}. Contractors can require it for dispatch.`, href: "/certs" });
+    const left = daysUntil(calendarDay(c.expiryDate), today);
+    if (left < 0) out.push({ id: `cert-${c.id}`, level: "urgent", title: `${c.name} expired`, detail: `Expired ${calendarDay(c.expiryDate).toLocaleDateString("en-US")}. Contractors can require it for dispatch.`, href: "/certs" });
     else if (left <= UNION_RULES.certWarningDays) out.push({ id: `cert-${c.id}`, level: left <= 14 ? "urgent" : "soon", title: `${c.name} expires in ${left} day${left === 1 ? "" : "s"}`, href: "/certs" });
   }
 

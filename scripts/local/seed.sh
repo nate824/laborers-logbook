@@ -1,33 +1,51 @@
 #!/usr/bin/env bash
 # Seed demo data into the running local app (npm run dev:local first).
-# Creates two techs so the shared signer list is visible from both sides.
-# These are local test accounts only.
-#   Tech 1: tech@acl.test   / password1
-#   Tech 2: crew@acl.test   / password1
-#   Demo:   User@email.com  / 123        (regular user for demos)
-#   Admin:  seeded by the server at boot (see setupAdmin in server/routes.ts)
+# Local test accounts only:
+#   Member:     member@laborers.test     / password1  (temp journeyman: covered, on the list, one short month at the fund)
+#   Apprentice: apprentice@laborers.test / password1  (period 2 apprentice)
+#   Admin:      seeded by the server at boot (see setupAdmin in server/routes.ts)
 set -euo pipefail
-BASE="${BASE:-http://localhost:5000}"
+BASE="${BASE:-http://localhost:5050}"
 TMP="$(mktemp -d)"; trap 'rm -rf "$TMP"' EXIT
 post() { curl -sf -b "$TMP/$1" -c "$TMP/$1" -H 'Content-Type: application/json' \
-  -H "Origin: $BASE" -X POST "$BASE$2" -d "$3" >/dev/null; }
+  -H "Origin: $BASE" -X "${4:-POST}" "$BASE$2" -d "$3" >/dev/null; }
 # Register a user; returns non-zero if the account already exists, so its demo
 # data is only seeded once (re-running the script is safe).
-newuser() { post "$1" /api/auth/register "$2" || { echo "  $3 already exists — skipping"; return 1; }; }
+newuser() { post "$1" /api/auth/register "$2" || { echo "  $3 already exists, skipping"; return 1; }; }
+
+# N weekdays of on-the-job rows in a month: day1..dayN, 8 hrs each.
+days() { # user month count employer union
+  local rows="" d
+  for d in $(seq 1 "$3"); do
+    rows+="{\"date\":\"$2-$(printf %02d $((d + (d-1)/5*2)))\",\"location\":\"Hwy 58 widening\",\"method\":\"ON_THE_JOB\",\"hours\":8,\"details\":{\"employer\":\"$4\",\"union\":\"$5\",\"county\":\"Kern\"}},"
+  done
+  post "$1" /api/entries "[${rows%,}]"
+}
 
 echo "Seeding $BASE ..."
-if newuser a '{"email":"tech@acl.test","password":"password1","name":"Test Tech","employeeNumber":"ACL-42"}' tech@acl.test; then
-post a /api/entries '[{"date":"2026-10-14","location":"I-70 Glenwood Canyon","method":"DRILLING","hours":9},{"date":"2026-10-15","location":"I-70 Glenwood Canyon","method":"SHOTCRETE","hours":7.5},{"date":"2026-10-16","location":"US-6 Clear Creek","method":"DRILLING","hours":10}]'
-post a /api/rope-hours '{"startDate":"2026-10-10","endDate":"2026-10-12","location":"Glenwood Canyon","skills":"Ascent, Descent, Hauling","hours":28,"employer":"Access Limited","maxHeight":"60m"}'
-post a /api/supervisors '{"name":"Dana Foreman","email":"dana.foreman@acl.test","phone":"970-555-0101","company":"Access Limited","spratNumber":"S-1234","qualifications":[{"method":"ROPE_ACCESS","level":"Level III"}]}'
+if newuser a '{"email":"member@laborers.test","password":"password1","name":"Sam Laborer"}' member@laborers.test; then
+  days a 2026-05 15 "Granite Construction" Union
+  days a 2026-06 18 "Granite Construction" Union
+  days a 2026-07 16 "Granite Construction" Union
+  days a 2026-08 12 "Granite Construction" Union
+  days a 2026-09 14 "Access Limited" Union
+  days a 2026-10 10 "Access Limited" Union
+  post a /api/entries '[{"date":"2026-10-17","location":"LTS Bakersfield","method":"CLASSROOM","hours":8,"details":{"course":"Confined Space","school":"LTS Bakersfield"}}]'
+  post a /api/union/profile '{"classification":"TEMP_JOURNEYMAN","localNumber":"220","priorOjtHours":0,"priorRsiHours":0,"startingBank":0,"duesPaidThrough":"2026-09"}' PUT
+  post a /api/union/fund-reports '{"month":"2026-07","employer":"Granite Construction","hours":128}'
+  post a /api/union/fund-reports '{"month":"2026-08","employer":"Granite Construction","hours":72}'
+  post a /api/union/dispatch '{"date":"2026-04-28","kind":"REGISTERED"}'
+  post a /api/union/dispatch '{"date":"2026-05-01","kind":"DISPATCHED","employer":"Granite Construction"}'
+  post a /api/union/dispatch '{"date":"2026-08-20","kind":"LAID_OFF","employer":"Granite Construction"}'
+  post a /api/union/dispatch '{"date":"2026-10-01","kind":"REGISTERED","note":"Signed at the hall"}'
+  post a /api/certifications '{"name":"OSHA 10","issuingBody":"OSHA","issueDate":"2025-03-10"}'
+  post a /api/certifications '{"name":"First Aid / CPR","issuingBody":"American Red Cross","issueDate":"2024-11-05","expiryDate":"2026-11-05"}'
+  post a /api/supervisors '{"name":"Dana Foreman","email":"dana.foreman@laborers.test","phone":"661-555-0101","company":"Granite Construction"}'
 fi
 
-if newuser b '{"email":"crew@acl.test","password":"password1","name":"Crew Member","employeeNumber":"ACL-77"}' crew@acl.test; then
-post b /api/supervisors '{"name":"Riley Super","email":"riley.super@acl.test","phone":"970-555-0102","company":"Access Limited","qualifications":[{"method":"DRILLING","level":"Level II"},{"method":"SHOTCRETE","level":"Level II"}]}'
-fi
-if newuser c '{"email":"User@email.com","password":"123","name":"Demo User","employeeNumber":"ACL-100"}' User@email.com; then
-post c /api/entries '[{"date":"2026-10-06","location":"I-70 Glenwood Canyon","method":"DRILLING","hours":10},{"date":"2026-10-07","location":"I-70 Glenwood Canyon","method":"DRILLING","hours":9.5},{"date":"2026-10-08","location":"I-70 Glenwood Canyon","method":"SHOTCRETE","hours":8},{"date":"2026-10-13","location":"US-6 Clear Creek","method":"SHOTCRETE","hours":6.5},{"date":"2026-10-14","location":"US-6 Clear Creek","method":"DRILLING","hours":10}]'
-post c /api/rope-hours '{"startDate":"2026-10-01","endDate":"2026-10-03","location":"Glenwood Canyon","skills":"Ascent, Descent, Rope to Rope Transfer, Deviation","hours":30,"employer":"Access Limited","workDetails":"Rock scaling and mesh install","maxHeight":"80m"}'
-post c /api/rope-hours '{"startDate":"2026-10-09","endDate":"2026-10-09","location":"US-6 Clear Creek","skills":"Ascent, Descent, Hauling","hours":9,"employer":"Access Limited","workDetails":"Anchor drilling on rope","maxHeight":"40m"}'
+if newuser b '{"email":"apprentice@laborers.test","password":"password1","name":"Alex Apprentice"}' apprentice@laborers.test; then
+  days b 2026-09 20 "Granite Construction" Union
+  post b /api/entries '[{"date":"2026-10-03","location":"LTS Bakersfield","method":"CLASSROOM","hours":8,"details":{"course":"OSHA 30","school":"LTS Bakersfield"}}]'
+  post b /api/union/profile '{"classification":"APPRENTICE","localNumber":"220","priorOjtHours":520,"priorRsiHours":44,"startingBank":0,"duesPaidThrough":"2026-10"}' PUT
 fi
 echo "Done. Log in at $BASE (accounts listed at the top of scripts/local/seed.sh)."

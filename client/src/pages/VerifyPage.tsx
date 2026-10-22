@@ -125,7 +125,7 @@ export default function VerifyPage() {
   const item = data.entry || data.ropeHour;
   const isRopeHour = type === 'rope_hour';
   
-  // Format method for display (only for field-hours entries)
+  // Format method for display (only for work-hours entries)
   let displayMethod = '';
   if (!isRopeHour && item.method) {
     displayMethod = fieldMethodLabel(item.method);
@@ -136,16 +136,16 @@ export default function VerifyPage() {
       <div className="w-full max-w-md bg-white p-8 rounded-lg shadow-md">
         <div className="mb-8 text-center">
           <h1 className="text-2xl font-semibold mb-2">
-            {isRopeHour ? 'Rope Hours Verification' : 'Field Hours Verification'}
+            {isRopeHour ? 'Rope Hours Verification' : 'Work Hours Verification'}
           </h1>
           <p className="text-neutral-500">
-            Please verify the {isRopeHour ? 'rope' : 'field'} hours for the technician
+            Please confirm the {isRopeHour ? 'rope' : 'work'} hours for this worker
           </p>
         </div>
         
         <div className="bg-neutral-100 rounded-md p-4 mb-6">
           <dl className="grid grid-cols-2 gap-x-4 gap-y-2 text-sm">
-            <dt className="text-neutral-500">Technician:</dt>
+            <dt className="text-neutral-500">Worker:</dt>
             <dd className="text-neutral-900 font-medium">{user.name}</dd>
             <dt className="text-neutral-500">Employee #:</dt>
             <dd className="text-neutral-900 font-medium">{user.employeeNumber}</dd>
@@ -177,7 +177,7 @@ export default function VerifyPage() {
                 <dd className="text-neutral-900 font-medium">
                   {formatCalendarDate(item.date)}
                 </dd>
-                <dt className="text-neutral-500">Method:</dt>
+                <dt className="text-neutral-500">Type:</dt>
                 <dd className="text-neutral-900 font-medium">{displayMethod}</dd>
                 {fieldMethodDetails(item.method)
                   .filter((d) => item.details?.[d.key])
@@ -204,7 +204,7 @@ export default function VerifyPage() {
               name="verifierName"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Your Name (Supervisor)</FormLabel>
+                  <FormLabel>Your name (foreman / supervisor)</FormLabel>
                   <FormControl>
                     <Input 
                       placeholder="Enter your full name" 

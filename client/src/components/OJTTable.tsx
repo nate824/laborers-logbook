@@ -88,7 +88,7 @@ export function OJTTable({
           ) : (
             <ChevronRight className="h-5 w-5 text-neutral-500" />
           )}
-          Field Hours Log
+          Work Hours Log
         </button>
         <div className="flex flex-wrap gap-2">
           {canBatchVerify && (

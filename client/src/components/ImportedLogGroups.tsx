@@ -79,7 +79,7 @@ export function ImportedLogGroups({
         description:
           "All field-hour and rope-hour entries from that signed log were deleted.",
       });
-      // The endpoint deletes both field-hours entries and rope hours that share the
+      // The endpoint deletes both work-hours entries and rope hours that share the
       // same sourceDocumentKey, so refresh both caches regardless of which
       // page triggered the action.
       queryClient.invalidateQueries({ queryKey: ["/api/entries"] });

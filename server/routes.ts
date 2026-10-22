@@ -724,7 +724,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Delete an field-hours entry. Only the owner can delete their own entries.
+  // Delete an work-hours entry. Only the owner can delete their own entries.
   // For imported entries, when no other entry or rope-hour record references
   // the same source document, the underlying object-storage file is deleted
   // as well.
@@ -1568,7 +1568,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const totalHours = resolvedEntries.reduce((sum, e) => sum + e.hours, 0);
       const smsBody = buildSignatureSms({
         requester: user?.name || user?.email || "A technician",
-        summary: `${resolvedEntries.length} days of field hours (${totalHours.toFixed(1)}h)`,
+        summary: `${resolvedEntries.length} days of work hours (${totalHours.toFixed(1)}h)`,
         url: verificationUrl,
       });
       const delivery = await deliverSignatureRequest({
@@ -2764,7 +2764,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         certIds: [],
       };
 
-      // field hours, restricted to the methods the owner chose to share.
+      // work hours, restricted to the methods the owner chose to share.
       const allowMethods = new Set(settings.ojtMethods);
       const entries = await storage.getEntries(user.id);
       const byMethod = new Map<

@@ -257,7 +257,7 @@ function buildServer(userId: number): McpServer {
   // -------- Field hours entries --------
   server.tool(
     "list_entries",
-    "List all field-hours entries (daily drilling/shotcrete log) for the authenticated user, newest first.",
+    "List all work-hours entries (daily drilling/shotcrete log) for the authenticated user, newest first.",
     {
       method: z.enum(VALID_METHODS as [string, ...string[]]).optional()
         .describe(`Optional field method filter (${VALID_METHODS.join(", ")})`),
@@ -276,7 +276,7 @@ function buildServer(userId: number): McpServer {
 
   server.tool(
     "get_entry_totals",
-    "Sum field hours grouped by method, returning total hours and verified hours per method.",
+    "Sum work hours grouped by method, returning total hours and verified hours per method.",
     {},
     async () => {
       const all = await storage.getEntries(userId);
@@ -288,7 +288,7 @@ function buildServer(userId: number): McpServer {
 
   server.tool(
     "create_entry",
-    "Log a new field-hours entry. Date must be ISO-8601 (e.g. '2025-05-19' or full ISO timestamp).",
+    "Log a new work-hours entry. Date must be ISO-8601 (e.g. '2025-05-19' or full ISO timestamp).",
     {
       date: z.string().describe("ISO date or datetime"),
       location: z.string().min(1).max(500),
@@ -315,7 +315,7 @@ function buildServer(userId: number): McpServer {
 
   server.tool(
     "update_entry",
-    "Update fields on an existing field-hours entry owned by the user.",
+    "Update fields on an existing work-hours entry owned by the user.",
     {
       id: z.number().int().positive(),
       date: z.string().optional(),
@@ -343,7 +343,7 @@ function buildServer(userId: number): McpServer {
 
   server.tool(
     "delete_entry",
-    "Delete a field-hours entry owned by the user.",
+    "Delete a work-hours entry owned by the user.",
     { id: z.number().int().positive() },
     async ({ id }) => {
       const existing = await storage.getEntry(id);
@@ -467,7 +467,7 @@ function buildServer(userId: number): McpServer {
 
   server.tool(
     "create_supervisor",
-    "Add a supervisor that can be used to verify field-hours entries or rope hours.",
+    "Add a supervisor that can be used to verify work-hours entries or rope hours.",
     {
       name: z.string().min(1),
       email: z.string().email(),
@@ -539,7 +539,7 @@ function buildServer(userId: number): McpServer {
   // -------- Verification requests --------
   server.tool(
     "request_verification",
-    "Send a verification email to a supervisor for one or more unverified field-hours entries. Pass exactly one entryId for a single-entry request, or 2+ entryIds for a batched email.",
+    "Send a verification email to a supervisor for one or more unverified work-hours entries. Pass exactly one entryId for a single-entry request, or 2+ entryIds for a batched email.",
     {
       entryIds: z.array(z.number().int().positive()).min(1),
       supervisorId: z.number().int().positive(),
@@ -597,7 +597,7 @@ function buildServer(userId: number): McpServer {
         phone: supervisor.phone,
         smsBody: buildSignatureSms({
           requester: user.name || user.email,
-          summary: `${resolved.length} days of field hours`,
+          summary: `${resolved.length} days of work hours`,
           url,
         }),
         sendEmail: () => sendBatchVerificationRequest(supervisor, user, resolved, batchToken, baseUrl),
@@ -786,7 +786,7 @@ function buildServer(userId: number): McpServer {
         storage.getCertifications(targetId),
       ]);
       return ok(
-        `${target.name ?? target.email}: ${entries.length} field-hours entries, ${rope.length} rope records, ${certs.length} certs.`,
+        `${target.name ?? target.email}: ${entries.length} work-hours entries, ${rope.length} rope records, ${certs.length} certs.`,
         {
           user: sanitizeUserRow(target),
           ojtTotals: ndtTotalsFromEntries(entries),

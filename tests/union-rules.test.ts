@@ -136,7 +136,7 @@ describe("listStatus", () => {
   const today = new Date(2026, 9, 22);
 
   it("counts down 30 days from the last sign-in", () => {
-    const s = listStatus([{ date: new Date(2026, 9, 1), kind: "REGISTERED" }], today);
+    const s = listStatus([{ date: "2026-10-01T00:00:00.000Z", kind: "REGISTERED" }], today);
     expect(s.state).toBe("ON_LIST");
     expect(s.daysLeft).toBe(9);
   });
@@ -144,8 +144,8 @@ describe("listStatus", () => {
   it("restarts the clock on re-registration and stops it on dispatch", () => {
     const s = listStatus(
       [
-        { date: new Date(2026, 8, 1), kind: "REGISTERED" },
-        { date: new Date(2026, 9, 20), kind: "RE_REGISTERED" },
+        { date: "2026-09-01T00:00:00.000Z", kind: "REGISTERED" },
+        { date: "2026-10-20T00:00:00.000Z", kind: "RE_REGISTERED" },
       ],
       today,
     );
@@ -153,8 +153,8 @@ describe("listStatus", () => {
     expect(s.since).toEqual(new Date(2026, 8, 1));
     const working = listStatus(
       [
-        { date: new Date(2026, 8, 1), kind: "REGISTERED" },
-        { date: new Date(2026, 9, 5), kind: "DISPATCHED", employer: "Granite" },
+        { date: "2026-09-01T00:00:00.000Z", kind: "REGISTERED" },
+        { date: "2026-10-05T00:00:00.000Z", kind: "DISPATCHED", employer: "Granite" },
       ],
       today,
     );
@@ -162,7 +162,7 @@ describe("listStatus", () => {
   });
 
   it("goes negative when re-registration is overdue", () => {
-    expect(listStatus([{ date: new Date(2026, 8, 1), kind: "REGISTERED" }], today).daysLeft).toBe(-21);
+    expect(listStatus([{ date: "2026-09-01T00:00:00.000Z", kind: "REGISTERED" }], today).daysLeft).toBe(-21);
   });
 });
 
@@ -202,7 +202,7 @@ describe("reminders", () => {
     const r = reminders({
       ...base,
       profile: { ...base.profile, duesPaidThrough: "2026-09" },
-      certs: [{ id: 1, name: "First Aid / CPR", expiryDate: new Date(2026, 9, 1) }],
+      certs: [{ id: 1, name: "First Aid / CPR", expiryDate: "2026-10-01T00:00:00.000Z" }],
       unverifiedOld: 2,
     });
     expect(r.map((x) => x.id)).toEqual(["cert-1", "dues", "unsigned"]);
@@ -210,7 +210,7 @@ describe("reminders", () => {
   });
 
   it("warns a week before re-registration is due", () => {
-    const list = listStatus([{ date: new Date(2026, 8, 27), kind: "REGISTERED" }], base.today);
+    const list = listStatus([{ date: "2026-09-27T00:00:00.000Z", kind: "REGISTERED" }], base.today);
     expect(reminders({ ...base, list })[0]).toMatchObject({ id: "rereg", level: "soon" });
   });
 });

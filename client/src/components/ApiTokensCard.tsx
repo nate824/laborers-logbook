@@ -78,7 +78,7 @@ export function ApiTokensCard() {
       <div className="mb-4">
         <h2 className="text-lg font-semibold text-neutral-900">Claude / MCP access tokens</h2>
         <p className="text-sm text-neutral-600 mt-1">
-          Create a bearer token to let Claude (or another MCP client) read and update your field hours log on your
+          Create a bearer token to let Claude (or another MCP client) read and update your work hours log on your
           behalf. Each token grants full access to your account except admin and signed-log import — treat
           them like passwords.
         </p>
@@ -162,7 +162,7 @@ export function ApiTokensCard() {
           </pre>
           <p>Authentication: <code>Authorization: Bearer &lt;your-token&gt;</code></p>
           <p>
-            Once connected, Claude can list and log field hours, manage supervisors, request verification
+            Once connected, Claude can list and log work hours, manage supervisors, request verification
             emails, and generate vendor PDF forms — all on your behalf.
           </p>
           <p>

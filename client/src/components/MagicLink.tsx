@@ -65,7 +65,7 @@ export function MagicLink() {
     <div className="w-full max-w-md bg-white p-8 rounded-lg shadow-md">
       <div className="mb-8 text-center">
         <h1 className="text-2xl font-semibold mb-2">Laborers Logbook</h1>
-        <p className="text-muted-foreground">Log in to access your field hours log</p>
+        <p className="text-muted-foreground">Log in to access your work hours log</p>
       </div>
       
       <Form {...form}>

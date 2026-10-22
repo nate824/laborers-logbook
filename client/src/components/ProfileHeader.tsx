@@ -6,7 +6,9 @@ import { useLocation } from "wouter";
 import {
   FileSpreadsheet,
   ClipboardList,
-  Cable,
+  Home,
+  HeartPulse,
+  Award,
   Settings,
   UserCheck,
   LogOut,
@@ -91,8 +93,10 @@ export function ProfileHeader({ user, onExport }: ProfileHeaderProps) {
   };
 
   const navItems = [
-    { path: "/field-hours", label: "Field Hours", short: "Field", icon: ClipboardList },
-    { path: "/rope-hours", label: "Rope Hours", short: "Rope", icon: Cable },
+    { path: "/status", label: "Status", short: "Status", icon: Home },
+    { path: "/hours", label: "Work Hours", short: "Hours", icon: ClipboardList },
+    { path: "/benefits", label: "Benefits", short: "Benefits", icon: HeartPulse },
+    { path: "/certs", label: "Certs", short: "Certs", icon: Award },
     { path: "/signers", label: "Signers", short: "Signers", icon: UserCheck },
   ];
 
@@ -110,11 +114,11 @@ export function ProfileHeader({ user, onExport }: ProfileHeaderProps) {
         <header className="sticky top-0 z-30 bg-card/95 backdrop-blur border-b border-border pt-safe">
           <div className="h-14 px-4 flex items-center justify-between gap-3">
             <div className="flex items-center gap-2 min-w-0">
-              <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-md bg-[#024985] text-[10px] font-bold tracking-tight text-white">
-                ACL
+              <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-md bg-primary text-[10px] font-bold tracking-tight text-primary-foreground">
+                LBR
               </span>
               <span className="truncate text-base font-semibold text-foreground">
-                {navItems.find((n) => n.path === location)?.label ?? "Logbook"}
+                {navItems.find((n) => n.path === location)?.label ?? (location === "/list" ? "Out-of-work list" : "Logbook")}
               </span>
               <ConnectivityChip />
             </div>
@@ -187,9 +191,9 @@ export function ProfileHeader({ user, onExport }: ProfileHeaderProps) {
 
         {/* Bottom tab bar — thumb-reachable navigation on phones. */}
         <nav className="fixed inset-x-0 bottom-0 z-30 border-t border-border bg-card/95 backdrop-blur pb-safe">
-          <div className="grid grid-cols-3">
+          <div className="grid grid-cols-5">
             {navItems.map(({ path, short, icon: Icon }) => {
-              const active = location === path;
+              const active = location === path || (path === "/hours" && location === "/field-hours") || (path === "/status" && location === "/list");
               return (
                 <button
                   key={path}
@@ -276,6 +280,8 @@ export function ProfileHeader({ user, onExport }: ProfileHeaderProps) {
         </div>
       </header>
 
+      {/* Name + export bar, only on the log pages that export. */}
+      {onExport && (
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="bg-white rounded-lg shadow-sm p-6 mb-8">
           <div className="sm:flex sm:items-center sm:justify-between">
@@ -301,6 +307,7 @@ export function ProfileHeader({ user, onExport }: ProfileHeaderProps) {
           </div>
         </div>
       </div>
+      )}
     </>
   );
 }

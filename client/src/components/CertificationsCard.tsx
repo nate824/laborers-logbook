@@ -1,4 +1,5 @@
 import { formatCalendarDate } from "@shared/dates";
+import { CERT_PRESETS } from "@shared/union";
 import { useRef, useState } from "react";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { apiRequest, queryClient } from "@/lib/queryClient";
@@ -89,14 +90,24 @@ function expiryStatus(expiry: string | Date | null): {
   return { label: "Valid", className: "bg-green-100 text-green-700 border-green-200" };
 }
 
-export function CertificationsCard() {
+// Suggested expiry for a common laborer credential: issue date + its usual
+// renewal interval. Only a suggestion; the card's own date wins.
+function suggestedExpiry(name: string, issueDate: string): string {
+  const preset = CERT_PRESETS.find((p) => p.name === name.trim());
+  if (!preset?.renewMonths || !issueDate) return "";
+  const [y, m, d] = issueDate.split("-").map(Number);
+  const out = new Date(Date.UTC(y, m - 1 + preset.renewMonths, d));
+  return out.toISOString().slice(0, 10);
+}
+
+export function CertificationsCard({ defaultExpanded = false }: { defaultExpanded?: boolean } = {}) {
   const { toast } = useToast();
   const [isOpen, setIsOpen] = useState(false);
   const [editingId, setEditingId] = useState<number | null>(null);
   const [form, setForm] = useState<CertForm>(EMPTY_FORM);
   const [uploading, setUploading] = useState(false);
   // Collapsed by default to keep the profile page short.
-  const [expanded, setExpanded] = useState(false);
+  const [expanded, setExpanded] = useState(defaultExpanded);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const { data: certs = [], isLoading } = useQuery<Certification[]>({
@@ -266,8 +277,9 @@ export function CertificationsCard() {
           </button>
           {expanded ? (
             <p className="text-sm text-neutral-600 mt-1">
-              Store every credential in one place — ASNT, IRATA, SPRAT, employer
-              cards. Attach the certificate and track expiry dates.
+              Keep every card in one place: OSHA, first aid, HAZWOPER, flagging,
+              forklift. Contractors can require them before dispatch. Snap a photo
+              of the card and track expiry dates.
             </p>
           ) : (
             (expiredCount > 0 || soonCount > 0) && (
@@ -388,10 +400,16 @@ export function CertificationsCard() {
                 id="cert-name"
                 value={form.name}
                 onChange={(e) => setForm({ ...form, name: e.target.value })}
-                placeholder="e.g. SPRAT Level 2"
+                placeholder="e.g. OSHA 30, First Aid / CPR"
+                list="cert-presets"
                 maxLength={200}
                 required
               />
+              <datalist id="cert-presets">
+                {CERT_PRESETS.map((p) => (
+                  <option key={p.name} value={p.name} />
+                ))}
+              </datalist>
             </div>
 
             <div>
@@ -464,7 +482,13 @@ export function CertificationsCard() {
                   id="cert-issue"
                   type="date"
                   value={form.issueDate}
-                  onChange={(e) => setForm({ ...form, issueDate: e.target.value })}
+                  onChange={(e) =>
+                    setForm({
+                      ...form,
+                      issueDate: e.target.value,
+                      expiryDate: form.expiryDate || suggestedExpiry(form.name, e.target.value),
+                    })
+                  }
                 />
               </div>
               <div>

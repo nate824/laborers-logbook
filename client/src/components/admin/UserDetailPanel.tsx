@@ -411,7 +411,7 @@ export function UserDetailPanel({
         )}
       </Section>
 
-      {/* field hours log */}
+      {/* work hours log */}
       <Section title="Field hours log" count={entries.length}>
         {entries.length === 0 ? (
           <p className="text-sm text-neutral-500">No entries.</p>
