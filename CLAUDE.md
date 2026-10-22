@@ -20,6 +20,10 @@ Inherited from ACL and unchanged: verification links (single/batch), crypto inte
 
 **Shared signer list**: every user sees every signer (`storage.getSupervisors()` takes no user). Only the user who added a signer, or an admin, can edit/delete it. Policy lives in `server/signers.ts`.
 
+**Demo account** (`server/demoUser.ts`, run at boot after `setupAdmin`): `user@email.com` / `password123`, password reset every boot, sample data (≈5 months of hours, fund reports with one short month, list history, certs) seeded once, dated relative to today. Login email matching is case-insensitive (`storage.getUserByEmail` uses `lower()`). It is a shared account: anyone can see and change its data, and signers it adds land on the shared signer list.
+
+**How-to guide**: `client/public/logbook-guide.pdf` (the member slide deck printed to PDF), linked top-right on the login page. `client/public/sw.js` skips navigations to file paths so opening it doesn't overwrite the cached app shell.
+
 Brand: orange `--primary` inherited from ACL; header badge "LBR". Progress bars use a `bg-muted` track (the theme's `--secondary` is green).
 
 ## Commands

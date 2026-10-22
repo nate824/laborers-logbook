@@ -64,6 +64,7 @@ import {
 import { handleMcpRequest, takeExport } from "./mcp/server";
 import { registerOauthRoutes } from "./oauth/routes";
 import { registerUnionRoutes } from "./unionRoutes";
+import { ensureDemoUser } from "./demoUser";
 import {
   getValidAccessTokenByRaw as getOauthAccessTokenByRaw,
   touchAccessToken as touchOauthAccessToken,
@@ -3073,6 +3074,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   // Call setup admin function
   await setupAdmin();
+  await ensureDemoUser();
 
   const httpServer = createServer(app);
 

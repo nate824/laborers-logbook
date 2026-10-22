@@ -5,6 +5,7 @@ import { ThemeToggle } from "@/components/ThemeToggle";
 import { useToast } from "@/hooks/use-toast";
 import { useQuery } from "@tanstack/react-query";
 import { getQueryFn } from "@/lib/queryClient";
+import { BookOpen } from "lucide-react";
 
 export default function AuthPage() {
   const [, setLocation] = useLocation();
@@ -46,7 +47,17 @@ export default function AuthPage() {
   
   return (
     <div className="flex min-h-screen bg-background relative">
-      <div className="absolute top-4 right-4 z-20">
+      <div className="absolute top-4 right-4 z-20 flex items-center gap-2">
+        {/* The how-to deck as a PDF (client/public), for people trying the demo. */}
+        <a
+          href="/logbook-guide.pdf"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="inline-flex h-10 items-center gap-2 rounded-md border border-border bg-card px-3 text-sm font-medium text-foreground shadow-sm hover:bg-muted"
+        >
+          <BookOpen className="h-4 w-4 text-primary" />
+          How-to guide (PDF)
+        </a>
         <ThemeToggle />
       </div>
       {/* Form side */}

@@ -103,6 +103,9 @@ self.addEventListener("fetch", (event) => {
   const url = new URL(req.url);
   if (url.origin !== self.location.origin) return;
   if (url.pathname.startsWith("/@") || url.pathname.includes("?v=")) return;
+  // Opening a file (e.g. /logbook-guide.pdf) in a tab is a navigation too;
+  // let the browser fetch it so it isn't cached as the app shell.
+  if (req.mode === "navigate" && /\.[a-z0-9]+$/i.test(url.pathname)) return;
 
   if (req.mode === "navigate") {
     event.respondWith(

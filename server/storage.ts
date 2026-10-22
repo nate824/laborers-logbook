@@ -156,7 +156,8 @@ export class DatabaseStorage implements IStorage {
   }
 
   async getUserByEmail(email: string): Promise<User | undefined> {
-    const [user] = await db.select().from(users).where(eq(users.email, email));
+    // Case-insensitive: "User@email.com" and "user@email.com" are one account.
+    const [user] = await db.select().from(users).where(sql`lower(${users.email}) = lower(${email})`);
     return user;
   }
 
